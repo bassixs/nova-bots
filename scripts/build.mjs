@@ -1,0 +1,17 @@
+import { mkdir, writeFile, copyFile } from 'node:fs/promises';
+import config from '../site.config.mjs';
+import { esc, header, hero, processSection, startSection, faq, contact, footer } from '../src/components.mjs';
+const origin = config.origin ? new URL(config.origin).origin : '';
+const canonical = origin ? origin + config.path : '';
+const publicConfig = {leadEndpoint:config.leadEndpoint,privacyPolicyUrl:config.privacyPolicyUrl,metrikaId:config.metrikaId};
+const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0B0B0D"><title>${esc(config.title)}</title><meta name="description" content="${esc(config.description)}"><meta name="robots" content="${config.indexable && origin?'index, follow':'noindex, nofollow'}"><meta property="og:type" content="website"><meta property="og:locale" content="ru_RU"><meta property="og:site_name" content="NOVA lab"><meta property="og:title" content="${esc(config.title)}"><meta property="og:description" content="${esc(config.description)}">${canonical ? `<link rel="canonical" href="${esc(canonical)}"><meta property="og:url" content="${esc(canonical)}">`:''}${config.ogImage && origin?`<meta property="og:image" content="${esc(new URL(config.ogImage, origin).href)}">`:''}<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B0B0D'/%3E%3Cpath d='M17 47V17h7l16 22V17h7v30h-7L24 25v22z' fill='%23987BFF'/%3E%3C/svg%3E"><link rel="stylesheet" href="/assets/style.css"><script type="application/json" id="site-config">${JSON.stringify(publicConfig).replace(/</g,'\\u003c')}</script><script type="module" src="/assets/app.js"></script></head><body>${header()}<main id="main">${hero()}${processSection()}${startSection()}${faq()}${contact(config)}</main>${footer(config)}<noscript><div class="noscript-note">Автопрокрутка и отправка формы требуют JavaScript. Все примеры доступны ниже.</div></noscript></body></html>`;
+await mkdir('dist/services/max-bots', { recursive: true });
+await mkdir('dist/assets', { recursive: true });
+await writeFile('dist/services/max-bots/index.html', html);
+await writeFile('dist/index.html', html);
+await copyFile('src/style.css', 'dist/assets/style.css');
+await copyFile('src/app.js', 'dist/assets/app.js');
+for (const asset of ['manrope-cyrillic.woff2','manrope-latin.woff2','OFL-Manrope.txt']) await copyFile('public/assets/' + asset, 'dist/assets/' + asset);
+await writeFile('dist/robots.txt', config.indexable && origin ? `User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n` : 'User-agent: *\nDisallow: /\n');
+await writeFile('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${canonical ? `<url><loc>${esc(canonical)}</loc></url>` : ''}</urlset>`);
+console.log('Built NOVA lab → dist/ (root and /services/max-bots/)');
