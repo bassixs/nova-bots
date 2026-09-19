@@ -20,4 +20,5 @@
 @media(max-width:900px){.hero-grid{grid-template-columns:minmax(0,1fr)}.scenario-carousel{width:100%;max-width:600px}.hero-copy{min-width:0}}
 @media(max-width:600px){.carousel-bottom{gap:10px}.scenario-caption{min-width:0}.carousel-controls{flex:none}.scenario-caption p{overflow-wrap:anywhere}.step h3 br{display:initial}.step h3 br:after{content:' '}}
 @media(min-width:901px) and (max-width:1100px){.hero-grid{grid-template-columns:minmax(0,1fr);gap:45px}.hero h1{font-size:62px}.hero-description{max-width:480px;font-size:16px}.hero-actions .button{font-size:14px;padding-inline:20px;gap:20px}.scenario-carousel{width:100%;max-width:620px;margin-inline:auto}.chat-panel{width:330px}.chat-body{font-size:13px;min-height:355px}.staff-panel{width:270px;top:200px}.staff-content dl{font-size:12px}.staff-content h3{font-size:18px}.result-note{font-size:12px}.slides-window{height:500px}.demo-heading,.demo-tag{font-size:12px}.orb{left:35%;top:500px}}
+@media(min-width:601px){.slides-window{height:520px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}.orb{opacity:.35}}
