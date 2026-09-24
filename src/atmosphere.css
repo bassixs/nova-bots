@@ -1,0 +1,199 @@
+/* A seamless optical loop: one dark lens, a travelling rim light and distant glass. */
+body {
+  background:
+    radial-gradient(ellipse 45% 32% at 90% 8%, #27334f55, transparent 78%),
+    radial-gradient(ellipse 40% 29% at 5% 55%, #20242d55, transparent 81%),
+    #090a0d;
+  background-attachment: fixed;
+}
+
+.orb-field {
+  isolation: isolate;
+  z-index: 0;
+  mask-image: linear-gradient(#000 0%, #000 72%, transparent 100%);
+}
+.orb {
+  z-index: 1;
+  left: calc(50% + 20px);
+  top: 102px;
+  width: min(73vw, 950px);
+  height: auto;
+  aspect-ratio: 1;
+  opacity: 1;
+  border: 1px solid #e1e8f064;
+  background:
+    radial-gradient(circle at 27% 20%, #eff5ff16, transparent 32%),
+    radial-gradient(circle at 52% 49%, #14182066 0 56%, #2630458c 69%, #0a0c11bc 81%);
+  box-shadow:
+    inset 1px 1px 0 #f7faff8c,
+    inset -2px -2px 0 #ffffff12,
+    inset -28px -34px 90px #65708f27,
+    0 0 0 12px #ffffff03,
+    0 22px 95px #03050bd9;
+  animation: nova-lens-float 24s ease-in-out infinite;
+}
+.orb::before {
+  content: '';
+  position: absolute;
+  inset: 7%;
+  border-radius: 50%;
+  background: conic-gradient(from 35deg,
+    transparent 0deg 100deg,
+    #eff5ff04 124deg,
+    #d9e7ff20 159deg,
+    #fff8 171deg,
+    #9cacc520 186deg,
+    transparent 222deg 360deg);
+  filter: blur(35px);
+  opacity: .42;
+  animation: nova-lens-light 24s linear infinite;
+}
+.orb::after {
+  inset: 18px;
+  border: 1px solid #e2e8f122;
+  box-shadow: inset -1px -1px 0 #ffffff0c;
+}
+.orb-glow, .orb-halo {
+  background: conic-gradient(from 25deg,
+    transparent 0deg 114deg,
+    #dfe9ff00 136deg,
+    #dfe9ffb5 154deg,
+    #fff 168deg,
+    #d7e6ffdd 178deg,
+    #8fa5d359 190deg,
+    #ffffff00 213deg,
+    transparent 360deg);
+  animation: nova-lens-light 24s linear infinite;
+}
+.orb-glow {
+  inset: -3px;
+  opacity: .95;
+  mask: radial-gradient(closest-side,
+    transparent calc(100% - 5px),
+    #000 calc(100% - 3px),
+    #000 calc(100% - 1px),
+    transparent 100%);
+  filter: drop-shadow(0 0 7px #eff5ffb8) drop-shadow(0 0 17px #8fa6dc85);
+}
+.orb-halo {
+  inset: -32px;
+  opacity: .48;
+  mask: radial-gradient(closest-side,
+    transparent calc(100% - 76px),
+    #000 calc(100% - 49px),
+    #000 calc(100% - 20px),
+    transparent 100%);
+  filter: blur(19px);
+}
+
+.orb-field::before, .orb-field::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid #edf5ff78;
+  background:
+    radial-gradient(circle at 29% 21%, #f7fbffcf 0%, #dbe8f56b 7%, #cbd8e821 20%, transparent 42%),
+    radial-gradient(circle at 68% 76%, #899ab044 0%, #1b202bd9 49%, #08090df2 84%);
+  box-shadow:
+    inset 3px 3px 7px #ffffff6b,
+    inset -12px -16px 24px #03050bd9,
+    0 15px 36px #0009,
+    0 0 26px #dce8ff1f;
+  pointer-events: none;
+}
+.orb-field::before {
+  width: 94px;
+  left: calc(50% - 105px);
+  top: 92px;
+  opacity: .68;
+  animation: nova-sphere-one 18s ease-in-out infinite;
+}
+.orb-field::after {
+  width: 150px;
+  right: -37px;
+  top: 525px;
+  opacity: .75;
+  animation: nova-sphere-two 22s ease-in-out infinite;
+}
+
+@keyframes nova-lens-light { to { transform: rotate(360deg); } }
+@keyframes nova-lens-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-9px, 12px, 0); }
+}
+@keyframes nova-sphere-one {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(15px, -18px, 0); }
+}
+@keyframes nova-sphere-two {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-17px, 13px, 0); }
+}
+.motion-paused .orb, .motion-paused .orb::before,
+.motion-paused .orb-glow, .motion-paused .orb-halo,
+.motion-paused .orb-field::before, .motion-paused .orb-field::after {
+  animation-play-state: paused;
+}
+
+/* The surfaces stay neutral; only the emblem and lens carry cold blue light. */
+.site-header, .chat-panel, .staff-panel, .start-panel, .contact-options {
+  background: linear-gradient(140deg, #373b456b 0%, #1b1d25c2 43%, #121318dc 100%);
+  border-color: #e2e8f45a;
+  box-shadow:
+    inset 0 1px 0 #ffffff3b,
+    inset 1px 0 0 #ffffff0c,
+    0 22px 65px #0009,
+    0 0 30px #d5e4ff0a;
+  -webkit-backdrop-filter: blur(24px) saturate(110%);
+  backdrop-filter: blur(24px) saturate(110%);
+}
+.bubble.bot { background: #dce3f014; border-color: #e2e8f02c; }
+.bubble.user { background: linear-gradient(130deg, #667596, #52617e); }
+.demo-choices span { background: #dce8ff12; border-color: #c5d1e06a; color: #e3e9f3; }
+.staff-count, .result-icon { background: #dce4f229; color: #e9edf8; }
+.start-panel::before { background: #e4edff2e; }
+.contact-section { background: radial-gradient(ellipse at 88% 20%, #9eaec81c, transparent 55%); }
+.contact-tabs { background: #0a0b0fa8; border-color: #d6dfeb55; }
+.contact-tabs button[aria-selected=true] {
+  background: linear-gradient(145deg, #f5f8ff, #cbd4e2);
+  color: #11151d;
+  box-shadow: inset 0 1px 0 #fff, 0 8px 22px #dce9ff22;
+}
+.button-outline, .icon-button {
+  background: linear-gradient(145deg, #ffffff1c, #ffffff06);
+  border-color: #e0e8f17a;
+}
+.button-outline:hover, .icon-button:hover { background: #ffffff24; border-color: #fff9; }
+
+@media (max-width: 1100px) {
+  .orb { width: 760px; left: 28%; top: 510px; }
+  .orb-field::before { left: 58%; top: 435px; width: 72px; }
+  .orb-field::after { right: -58px; top: 1010px; width: 125px; }
+}
+@media (max-width: 600px) {
+  .orb-field { mask-image: linear-gradient(#000 0%, #000 65%, transparent 100%); }
+  .orb {
+    width: 630px;
+    left: 48%;
+    top: 270px;
+    opacity: .8;
+    box-shadow: inset 1px 1px 0 #f7faff8c, inset -20px -25px 65px #65708f27, 0 14px 45px #03050b99;
+  }
+  .orb-halo { opacity: .28; filter: blur(12px); }
+  .orb-field::before { left: auto; right: 10px; top: 520px; width: 48px; opacity: .65; }
+  .orb-field::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orb, .orb::before, .orb-glow, .orb-halo,
+  .orb-field::before, .orb-field::after { animation: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .site-header, .chat-panel, .staff-panel, .start-panel, .contact-options {
+    background: #1b1d23;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
