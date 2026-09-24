@@ -20,7 +20,7 @@ await copyFile('src/app.js', 'dist/assets/app.js');
 await copyFile('src/intro.js', 'dist/assets/intro.js');
 await copyFile('public/.htaccess', 'dist/.htaccess');
 await copyFile('public/assets/nova-intro.mp4', 'dist/assets/nova-intro.mp4');
-await copyFile('public/assets/nova-background.mp4', 'dist/assets/nova-background.mp4');
+await copyFile('public/assets/nova-hero-endframe.png', 'dist/assets/nova-hero-endframe.png');
 for (const asset of ['nova-logo.png','manrope-cyrillic.woff2','manrope-latin.woff2','OFL-Manrope.txt','unbounded-cyrillic.woff2','unbounded-latin.woff2','OFL-Unbounded.txt']) await copyFile('public/assets/' + asset, 'dist/assets/' + asset);
 await writeFile('dist/robots.txt', config.indexable && origin ? `User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n` : 'User-agent: *\nDisallow: /\n');
 await writeFile('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${canonical ? `<url><loc>${esc(canonical)}</loc></url>` : ''}</urlset>`);
