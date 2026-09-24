@@ -1,0 +1,11 @@
+# Redirect HTTP traffic to HTTPS.
+RewriteEngine On
+RewriteCond %{SERVER_PORT} !^443$
+RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
+
+# Revalidate HTML so updated pages do not load cached scripts from older builds.
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>

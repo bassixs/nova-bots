@@ -1,7 +1,6 @@
 import { runIntro } from './intro.js';
 document.body.classList.add('js-ready');
 await runIntro();
-const config = JSON.parse(document.querySelector('#site-config').textContent);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const hero = document.querySelector('.hero');
 const carousel = document.querySelector('#scenarios');
@@ -38,22 +37,6 @@ function playConversation(slide) {
   animate(slide.querySelector('.result-note'),[{opacity:0,transform:'translateY(9px)'},{opacity:1,transform:'translateY(0)'}],{delay:deliveredAt+250,duration:500,fill:'backwards'});
   animate(slide.querySelector('.result-icon'),[{transform:'scale(.65)',opacity:0},{transform:'scale(1.12)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{delay:deliveredAt+350,duration:450,fill:'backwards'});
 }
-const attributionKeys = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','yclid'];
-let attribution = {};
-try { attribution = JSON.parse(sessionStorage.getItem('nova-attribution') || '{}'); } catch { /* Storage is optional. */ }
-if (!attribution || typeof attribution !== 'object' || Array.isArray(attribution)) attribution = {};
-attribution = Object.fromEntries(attributionKeys.filter(k => typeof attribution[k] === 'string').map(k => [k, attribution[k].slice(0,500)]));
-const query = new URLSearchParams(location.search);
-for (const key of attributionKeys) if (query.has(key)) attribution[key] = query.get(key).slice(0,500);
-try { sessionStorage.setItem('nova-attribution', JSON.stringify(attribution)); } catch { /* Continue without persistence. */ }
-const metrikaId = /^\d+$/.test(String(config.metrikaId)) ? Number(config.metrikaId) : null;
-if (metrikaId) {
-  window.ym = window.ym || function () { (window.ym.a = window.ym.a || []).push(arguments); };
-  window.ym.l = Date.now();
-  const script = document.createElement('script'); script.async = true; script.src = 'https://mc.yandex.ru/metrika/tag.js'; document.head.append(script);
-  window.ym(metrikaId, 'init', { clickmap:false, trackLinks:false, accurateTrackBounce:true, webvisor:false });
-}
-function track(event, params) { if (metrikaId && window.ym) window.ym(metrikaId, 'reachGoal', event, params); }
 function schedule() {
   clearTimeout(timer);
   hero.classList.toggle('motion-paused', !visible || document.hidden);
@@ -67,7 +50,7 @@ function schedule() {
 }
 function stop() { playing = false; schedule(); }
 function go(index, manual = true) {
-  if (manual) { stop(); track('scenario_interaction', { action:'switch', scenario:((index + slides.length) % slides.length) + 1 }); }
+  if (manual) stop();
   const next = (index + slides.length) % slides.length;
   if (next === active) { schedule(); return; }
   clearTimeout(transitionTimer);
@@ -133,13 +116,11 @@ revealItems.forEach((element, i) => {
   element.style.setProperty('--reveal-delay', element.classList.contains('step') ? `${(i-1)%4*90}ms` : '0ms');
   revealObserver.observe(element);
 });
-document.querySelectorAll('[data-primary-cta]').forEach(a => a.addEventListener('click', () => track('primary_cta_click')));
 const menuButton=document.querySelector('.menu-toggle'), menu=document.querySelector('#mobile-menu');
 function closeMenu() { menu.hidden=true; menuButton.setAttribute('aria-expanded','false'); menuButton.setAttribute('aria-label','Открыть меню'); }
 menuButton.addEventListener('click',()=> { const open=menu.hidden; menu.hidden=!open; menuButton.setAttribute('aria-expanded',String(open)); menuButton.setAttribute('aria-label',open?'Закрыть меню':'Открыть меню'); });
 menu.querySelectorAll('a').forEach(a=>a.addEventListener('click', closeMenu));
 document.addEventListener('keydown',e=> { if(e.key==='Escape'&&!menu.hidden){closeMenu();menuButton.focus();} });
-const form=document.querySelector('#lead-form'), status=document.querySelector('#form-status'), submit=form.querySelector('[type=submit]');
 const contactTabs = [...document.querySelectorAll('[data-contact-tab]')];
 function selectContactTab(tab) {
   contactTabs.forEach(item => {
@@ -150,7 +131,6 @@ function selectContactTab(tab) {
     panel.hidden = !selected;
     if (selected && !reduced.matches) panel.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:280,easing:'ease-out'});
   });
-  track('contact_method_select', {method:tab.dataset.contactTab});
 }
 contactTabs.forEach((tab, index) => {
   tab.addEventListener('click', () => selectContactTab(tab));
@@ -163,38 +143,4 @@ contactTabs.forEach((tab, index) => {
     if (next === undefined) return;
     event.preventDefault(); selectContactTab(contactTabs[next]); contactTabs[next].focus();
   });
-});
-document.querySelectorAll('[data-messenger]').forEach(link => link.addEventListener('click', () => track('messenger_click', {method:link.dataset.messenger})));
-const field = name => form.elements.namedItem(name);
-let started=false, submitting=false;
-form.addEventListener('input',()=>{if(!started){started=true;track('form_start');}});
-field('contact').addEventListener('input',()=> {
-  field('contact').removeAttribute('aria-invalid');document.querySelector('#error-contact').textContent='';
-});
-function contactMethod(value) {
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'email';
-  if (/^[+\d\s()\-]+$/.test(value) && value.replace(/\D/g,'').length >= 10 && value.replace(/\D/g,'').length <= 15) return 'phone';
-  return null;
-}
-function validate() {
-  const contact=field('contact').value.trim();
-  const error=!contact?'Оставьте телефон или электронную почту.':!contactMethod(contact)?'Укажите корректный email или телефон из 10–15 цифр.':'';
-  document.querySelector('#error-contact').textContent=error;
-  field('contact').setAttribute('aria-invalid',String(!!error));
-  if(error){field('contact').focus();return false;}return true;
-}
-form.addEventListener('submit',async e=> {
-  e.preventDefault(); if(submitting) return;
-  if(!validate()) return;
-  if(!config.leadEndpoint || !config.privacyPolicyUrl){ status.dataset.state='error';status.textContent='Приём заявок пока не подключён. Данные не отправлены. Для запуска нужны получатель заявок и политика обработки данных.';return; }
-  submitting=true;submit.disabled=true;submit.setAttribute('aria-busy','true');status.dataset.state='sending';status.textContent='Отправляем заявку…';
-  const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),15000);
-  const payload={name:'',organization:'',method:contactMethod(field('contact').value.trim()),contact:field('contact').value.trim(),task:field('task').value.trim(),attribution,page:location.pathname,consent:{policy:config.privacyPolicyUrl,acceptedAt:new Date().toISOString()}};
-  try{
-    const response=await fetch(config.leadEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
-    const result=await response.json();
-    if(!response.ok || result.ok!==true) throw new Error('not-confirmed');
-    status.dataset.state='success';status.textContent='Спасибо! Контакт получен. Свяжемся с вами, чтобы обсудить задачу.';track('lead_confirmed');form.reset();form.querySelector('.optional-task').open=false;field('contact').removeAttribute('aria-invalid');started=false;
-  }catch(error){status.dataset.state='error';status.textContent=error.name==='AbortError'?'Сервер не подтвердил отправку вовремя. Данные сохранены в форме — попробуйте ещё раз позже.':'Не удалось подтвердить отправку. Данные сохранены в форме — попробуйте ещё раз позже.';}
-  finally{clearTimeout(timeout);submitting=false;submit.disabled=false;submit.removeAttribute('aria-busy');}
 });

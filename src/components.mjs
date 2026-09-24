@@ -19,36 +19,29 @@ export function processSection() { return `<section class="process section conta
 export function startSection() { return `<section class="start-section container"><div class="start-panel"><div><p class="eyebrow">У КАЖДОГО ПРОЦЕССА СВОЯ ЛОГИКА</p><h2>Что обсудим<br> перед стартом</h2></div><div class="discussion-list"><div><span>01</span><h3>Задачи бота</h3><p>Что упростить и какой результат нужен</p></div><div><span>02</span><h3>Роли пользователей</h3><p>Кто обращается и кто обрабатывает запросы</p></div><div><span>03</span><h3>Интеграции</h3><p>Какие системы участвуют в процессе</p></div><div><span>04</span><h3>Сроки и сопровождение</h3><p>Приоритеты запуска и работа после него</p></div></div></div></section>`; }
 export function faq() { const items = [ ['От чего зависит стоимость?', 'От сложности сценария, количества ролей, необходимых подключений и объёма разработки. После обсуждения задачи определим состав работ и подготовим оценку.'], ['Можно ли доработать сценарий после запуска?', 'Да. Бота можно развивать по мере появления новых задач. Перед изменениями обсудим их влияние на текущий процесс, объём работ и стоимость.'], ['Как устроена поддержка?', 'Формат поддержки согласуем до запуска: какие задачи входят в сопровождение, как передавать обращения и в какие сроки на них реагировать.'], ['Какие данные нужны для начала работы?', 'Описание текущего процесса, типичные запросы, роли участников и желаемый результат. Если нужны подключения, обсудим доступную документацию и условия доступа к системам.'] ]; return `<section class="faq section container" id="faq"><div><p class="eyebrow">02 / ВОПРОСЫ И ОТВЕТЫ</p><h2>По делу.<br> До старта.</h2><p class="section-description">Несколько важных деталей<br> о совместной работе.</p></div><div class="faq-list">${items.map(([q,a])=>`<details><summary>${q}<span>${icon('plus')}</span></summary><p>${a}</p></details>`).join('')}</div></section>`; }
 export function contact(config) {
-  const defaultChannel = config.contacts.maxUrl ? 'max' : config.contacts.telegramUrl ? 'telegram' : 'form';
+  const defaultChannel = config.contacts.maxUrl ? 'max' : config.contacts.telegramUrl ? 'telegram' : 'vk';
   const messenger = (value, label, rawUrl) => {
     let url = '';
     try { const parsed = new URL(rawUrl); if (parsed.protocol === 'https:') url = parsed.href; } catch {}
+    const preposition = value === 'vk' ? 'во' : 'в';
     return `<div id="contact-panel-${value}" class="contact-panel messenger-panel" role="tabpanel" aria-labelledby="contact-tab-${value}" ${value === defaultChannel ? '' : 'hidden'}>
       <span class="contact-channel-label">В ЛИЧНОМ ДИАЛОГЕ</span>
-      <h3>Продолжим в ${label}</h3>
+      <h3>Продолжим ${preposition} ${label}</h3>
       <p>Напишите пару слов о задаче.<br>Уточним детали в переписке.</p>
-      ${url ? `<a class="button button-primary messenger-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer" data-messenger="${value}">Написать в ${label}${icon('diagonal')}</a>` : `<button type="button" class="button button-primary messenger-link" disabled>Написать в ${label}${icon('diagonal')}</button><p class="channel-unavailable">Ссылка на ${label} пока не добавлена.</p>`}
+      ${url ? `<a class="button button-primary messenger-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Написать ${preposition} ${label}${icon('diagonal')}</a>` : `<button type="button" class="button button-primary messenger-link" disabled>Написать ${preposition} ${label}${icon('diagonal')}</button><p class="channel-unavailable">Ссылка на ${label} пока не добавлена.</p>`}
     </div>`;
   };
   return `<section class="contact-section" id="contact"><div class="contact-grid container">
-    <div class="contact-copy"><p class="eyebrow">03 / ДАВАЙТЕ ОБСУДИМ</p><h2>Начнём<br>с вашей задачи<span class="title-dot">.</span></h2><p>Напишите в удобном мессенджере<br>или оставьте контакт. Детали обсудим в разговоре.</p><div class="contact-mark" aria-hidden="true">${brandImage()}</div></div>
+    <div class="contact-copy"><p class="eyebrow">03 / ДАВАЙТЕ ОБСУДИМ</p><h2>Начнём<br>с вашей задачи<span class="title-dot">.</span></h2><p>Выберите удобный канал и напишите нам.<br>Детали обсудим в переписке.</p><div class="contact-mark" aria-hidden="true">${brandImage()}</div></div>
     <div class="contact-options"><p class="contact-choice-label" id="contact-choice-label">Как вам удобнее?</p>
       <div class="contact-tabs" role="tablist" aria-labelledby="contact-choice-label">
-        ${[['max','MAX'],['telegram','Telegram'],['form','Оставить контакт']].map(([value,label])=>`<button type="button" role="tab" id="contact-tab-${value}" aria-controls="contact-panel-${value}" aria-selected="${value===defaultChannel}" tabindex="${value===defaultChannel?0:-1}" data-contact-tab="${value}">${label}</button>`).join('')}
+        ${[['max','MAX'],['telegram','Telegram'],['vk','ВКонтакте']].map(([value,label])=>`<button type="button" role="tab" id="contact-tab-${value}" aria-controls="contact-panel-${value}" aria-selected="${value===defaultChannel}" tabindex="${value===defaultChannel?0:-1}" data-contact-tab="${value}">${label}</button>`).join('')}
       </div>
       <div class="contact-panels">
-        ${messenger('max','MAX',config.contacts.maxUrl)}${messenger('telegram','Telegram',config.contacts.telegramUrl)}
-        <div id="contact-panel-form" class="contact-panel" role="tabpanel" aria-labelledby="contact-tab-form" ${defaultChannel==='form'?'':'hidden'}>
-          <form id="lead-form" class="lead-form compact-form" novalidate>
-            <label>Телефон или электронная почта<input name="contact" type="text" autocomplete="on" placeholder="+7 … или mail@company.ru" required maxlength="200" aria-describedby="error-contact"><small class="field-error" id="error-contact"></small></label>
-            <details class="optional-task"><summary>${icon('plus')}Добавить пару слов о задаче</summary><label><span class="sr-only">О вашей задаче (необязательно)</span><textarea name="task" rows="3" placeholder="Что хотите упростить?" maxlength="3000"></textarea></label></details>
-            <div class="form-bottom"><button class="button button-primary submit-button" type="submit">Свяжитесь со мной${icon('diagonal')}</button><p class="privacy-note">${config.privacyPolicyUrl ? `Нажимая кнопку, вы соглашаетесь с <a href="${esc(config.privacyPolicyUrl)}" target="_blank" rel="noopener">политикой обработки данных</a>.` : 'Политика обработки данных пока не подключена.'}</p></div>
-            <p class="form-status" id="form-status" role="status" aria-live="polite">${!config.leadEndpoint ? 'Приём заявок пока не подключён. Данные не отправляются.' : !config.privacyPolicyUrl ? 'Для приёма заявок необходимо подключить политику обработки данных.' : ''}</p>
-          </form>
-        </div>
+        ${messenger('max','MAX',config.contacts.maxUrl)}${messenger('telegram','Telegram',config.contacts.telegramUrl)}${messenger('vk','ВКонтакте',config.contacts.vkUrl)}
       </div>
     </div>
   </div></section>`;
 }
 
-export function footer(c) { return `<footer class="site-footer container"><div class="footer-top"><a class="brand" href="#top" aria-label="NOVA lab — в начало страницы">${logo()}</a><p>Идеи. Технологии.<br> Реальный результат.</p><a class="back-top" href="#top">Наверх ${icon('diagonal')}</a></div>${c.contacts.email || c.contacts.phone ? `<div class="footer-contacts">${c.contacts.email ? `<a href="mailto:${esc(c.contacts.email)}">${esc(c.contacts.email)}</a>`:''}${c.contacts.phone ? `<a href="tel:${esc(c.contacts.phone.replace(/[^+\d]/g,''))}">${esc(c.contacts.phone)}</a>`:''}</div>`:''}<div class="footer-bottom"><span>© ${new Date().getFullYear()} NOVA lab</span>${c.legalName ? `<span>${esc(c.legalName)} ${esc(c.legalDetails)}</span>`:''}${c.privacyPolicyUrl?`<a href="${esc(c.privacyPolicyUrl)}">Политика обработки данных</a>`:'<span>Маркетинг · ИИ-контент · Разработка · Автоматизация</span>'}</div></footer>`; }
+export function footer(c) { return `<footer class="site-footer container"><div class="footer-top"><a class="brand" href="#top" aria-label="NOVA lab — в начало страницы">${logo()}</a><p>Идеи. Технологии.<br> Реальный результат.</p><a class="back-top" href="#top">Наверх ${icon('diagonal')}</a></div>${c.contacts.email || c.contacts.phone ? `<div class="footer-contacts">${c.contacts.email ? `<a href="mailto:${esc(c.contacts.email)}">${esc(c.contacts.email)}</a>`:''}${c.contacts.phone ? `<a href="tel:${esc(c.contacts.phone.replace(/[^+\d]/g,''))}">${esc(c.contacts.phone)}</a>`:''}</div>`:''}<div class="footer-bottom"><span>© ${new Date().getFullYear()} NOVA lab</span>${c.legalName ? `<span>${esc(c.legalName)} ${esc(c.legalDetails)}</span>`:''}<span>Маркетинг · ИИ-контент · Разработка · Автоматизация</span></div></footer>`; }
