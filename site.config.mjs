@@ -7,7 +7,7 @@ export default {
   description: 'Разрабатываем чат-ботов в MAX для сбора заявок, записи на услуги и автоматизации рабочих процессов. Обсудите вашу задачу с NOVA lab.',
   indexable: true,
   ogImage: '/assets/nova-logo.png',
-  contacts: { email: '', phone: '', maxUrl: '', telegramUrl: 'https://t.me/aoexem' }, // Full HTTPS links to your business chats.
+  contacts: { email: '', phone: '', maxUrl: 'https://max.ru/join/DNu998Er0LL5Dia4npjuIV6KUdLfnPAlYZ50se8j5jk', telegramUrl: 'https://t.me/aoexem' }, // Full HTTPS links to your business chats.
   legalName: '',
   legalDetails: '',
   privacyPolicyUrl: '',
