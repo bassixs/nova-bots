@@ -3,6 +3,9 @@ document.body.classList.add('js-ready');
 await runIntro();
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const hero = document.querySelector('.hero');
+const backgroundField = hero.querySelector('.orb-field');
+const backgroundVideo = hero.querySelector('.hero-background-video');
+let backgroundVideoReady = false, backgroundVideoBlocked = false;
 const carousel = document.querySelector('#scenarios');
 const slides = [...document.querySelectorAll('[data-slide]')];
 slides.forEach((slide, i) => { if (i) { slide.setAttribute('aria-hidden','true'); slide.inert=true; } });
@@ -40,6 +43,15 @@ function playConversation(slide) {
 function schedule() {
   clearTimeout(timer);
   hero.classList.toggle('motion-paused', !visible || document.hidden);
+  if (backgroundVideoReady && !reduced.matches && visible && !document.hidden && !backgroundVideoBlocked) {
+    if (backgroundVideo.paused) backgroundVideo.play().catch(() => {
+      backgroundVideoBlocked = true;
+      backgroundField.classList.remove('has-video');
+    });
+  } else {
+    backgroundVideo.pause();
+    if (reduced.matches) backgroundField.classList.remove('has-video');
+  }
   for (const animation of sceneAnimations) {
     if (document.hidden || !slideVisible) animation.pause();
     else if (animation.playState === 'paused') animation.play();
@@ -101,7 +113,25 @@ new IntersectionObserver(entries => {
   schedule();
 }, {threshold:0.12}).observe(carousel);
 document.addEventListener('visibilitychange', schedule);
-reduced.addEventListener('change', () => { if (reduced.matches) { playing=false; clearSceneAnimations(); } schedule(); });
+backgroundVideo.addEventListener('loadeddata', () => { backgroundVideoReady = true; schedule(); });
+backgroundVideo.addEventListener('playing', () => {
+  if (!reduced.matches && !backgroundVideoBlocked) backgroundField.classList.add('has-video');
+});
+backgroundVideo.addEventListener('error', () => {
+  backgroundVideoReady = false;
+  backgroundField.classList.remove('has-video');
+});
+function loadBackgroundVideo() {
+  if (reduced.matches || navigator.connection?.saveData || backgroundVideo.getAttribute('src')) return;
+  backgroundVideo.src = '/assets/nova-background.mp4';
+  backgroundVideo.load();
+}
+reduced.addEventListener('change', () => {
+  if (reduced.matches) { playing=false; clearSceneAnimations(); }
+  loadBackgroundVideo();
+  schedule();
+});
+loadBackgroundVideo();
 schedule();
 // Reveal content once, without changing the document's scroll position.
 const revealItems = document.querySelectorAll('.section-heading, .step, .start-panel, .faq > div, .contact-copy, .contact-options');
