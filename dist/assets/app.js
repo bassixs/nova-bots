@@ -1,4 +1,6 @@
+import { runIntro } from './intro.js';
 document.body.classList.add('js-ready');
+await runIntro();
 const config = JSON.parse(document.querySelector('#site-config').textContent);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const hero = document.querySelector('.hero');
@@ -6,9 +8,36 @@ const carousel = document.querySelector('#scenarios');
 const slides = [...document.querySelectorAll('[data-slide]')];
 slides.forEach((slide, i) => { if (i) { slide.setAttribute('aria-hidden','true'); slide.inert=true; } });
 const dots = [...document.querySelectorAll('[data-go]')];
-const playButton = document.querySelector('#toggle-play');
-let active = 0, playing = !reduced.matches, visible = true, hovered = false, focused = false, timer;
+let active = 0, playing = !reduced.matches, visible = true, slideVisible = false, hovered = false, focused = false, timer;
 let transitionTimer;
+const sceneAnimations = new Set();
+let firstScenePlayed = false;
+function animate(element, frames, options) {
+  if (reduced.matches || !element) return;
+  const animation = element.animate(frames, {duration:600, easing:'cubic-bezier(.22,.7,.22,1)', ...options});
+  sceneAnimations.add(animation);
+  animation.onfinish = () => sceneAnimations.delete(animation);
+  if (document.hidden || !slideVisible) animation.pause();
+  return animation;
+}
+function clearSceneAnimations() {
+  for (const animation of sceneAnimations) animation.cancel();
+  sceneAnimations.clear();
+}
+function playConversation(slide) {
+  if (reduced.matches) return;
+  const messages = [...slide.querySelectorAll('.bubble, .demo-choices')];
+  messages.forEach((message, i) => animate(message, [
+    {opacity:0, transform:`translateY(14px) translateX(${message.classList.contains('user') ? 9 : -9}px) scale(.98)`},
+    {opacity:1, transform:'translateY(0) translateX(0) scale(1)'}
+  ], {duration:480, delay:220+i*160, fill:'backwards'}));
+  const deliveredAt = 220 + messages.length*160;
+  animate(slide.querySelector('.chat-status'), [{opacity:0,transform:'translateY(7px)'},{opacity:1,transform:'translateY(0)'}], {delay:deliveredAt,duration:400,fill:'backwards'});
+  animate(slide.querySelector('.staff-panel'), [{opacity:0,transform:'translate(24px,18px) scale(.97)'},{opacity:1,transform:'translate(0,0) scale(1)'}], {delay:500,duration:720,fill:'backwards'});
+  slide.querySelectorAll('dl > div').forEach((row,i) => animate(row,[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{delay:720+i*150,duration:450,fill:'backwards'}));
+  animate(slide.querySelector('.result-note'),[{opacity:0,transform:'translateY(9px)'},{opacity:1,transform:'translateY(0)'}],{delay:deliveredAt+250,duration:500,fill:'backwards'});
+  animate(slide.querySelector('.result-icon'),[{transform:'scale(.65)',opacity:0},{transform:'scale(1.12)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{delay:deliveredAt+350,duration:450,fill:'backwards'});
+}
 const attributionKeys = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','yclid'];
 let attribution = {};
 try { attribution = JSON.parse(sessionStorage.getItem('nova-attribution') || '{}'); } catch { /* Storage is optional. */ }
@@ -28,40 +57,41 @@ function track(event, params) { if (metrikaId && window.ym) window.ym(metrikaId,
 function schedule() {
   clearTimeout(timer);
   hero.classList.toggle('motion-paused', !visible || document.hidden);
-  if (playing && visible && !document.hidden && !hovered && !focused && !reduced.matches) timer = setTimeout(() => { go(active + 1, false); }, 7000);
+  for (const animation of sceneAnimations) {
+    if (document.hidden || !slideVisible) animation.pause();
+    else if (animation.playState === 'paused') animation.play();
+  }
+  const running = playing && visible && slideVisible && !document.hidden && !hovered && !focused && !reduced.matches;
+  carousel.classList.toggle('is-auto-running', running);
+  if (running) timer = setTimeout(() => { go(active + 1, false); }, 7000);
 }
-function renderPlay() {
-  const paused = !playing;
-  playButton.setAttribute('aria-pressed', String(paused));
-  playButton.setAttribute('aria-label', paused ? 'Включить автопрокрутку' : 'Приостановить автопрокрутку');
-  playButton.innerHTML = `<svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">${paused ? '<path d="m9 5 10 7-10 7z"/>' : '<path d="M9 6v12m6-12v12"/>'}</svg>`;
-  if (reduced.matches) { playButton.disabled = true; playButton.setAttribute('aria-label', 'Автопрокрутка отключена: уменьшение движения'); }
-  else playButton.disabled = false;
-}
-function stop() { playing = false; renderPlay(); schedule(); }
+function stop() { playing = false; schedule(); }
 function go(index, manual = true) {
   if (manual) { stop(); track('scenario_interaction', { action:'switch', scenario:((index + slides.length) % slides.length) + 1 }); }
   const next = (index + slides.length) % slides.length;
   if (next === active) { schedule(); return; }
   clearTimeout(transitionTimer);
+  clearSceneAnimations();
   slides.forEach(s => s.classList.remove('is-leaving','from-left'));
   const previous = slides[active];
   previous.classList.remove('is-active'); previous.classList.add('is-leaving'); previous.setAttribute('aria-hidden','true'); previous.inert = true;
   const target = slides[next];
-  if (index < active) { target.classList.add('from-left'); void target.offsetWidth; }
   target.classList.remove('from-left'); target.classList.add('is-active'); target.removeAttribute('aria-hidden'); target.inert = false;
+  const direction = index < active ? -1 : 1;
+  animate(previous, [{opacity:1,transform:'translateX(0) scale(1)'},{opacity:0,transform:`translateX(${-direction*90}px) scale(.97)`}], {duration:620});
+  animate(target, [{opacity:0,transform:`translateX(${direction*110}px) scale(.97)`},{opacity:1,transform:'translateX(0) scale(1)'}], {duration:760});
+  playConversation(target);
   active = next;
   dots.forEach((dot,i) => i===active ? dot.setAttribute('aria-current','true') : dot.removeAttribute('aria-current'));
   document.querySelector('#scenario-number').textContent = String(active+1).padStart(2,'0');
   document.querySelector('#scenario-title').textContent = target.getAttribute('aria-label').split(': ')[1];
   if (manual) document.querySelector('#carousel-announcement').textContent = target.getAttribute('aria-label');
-  transitionTimer = setTimeout(() => previous.classList.remove('is-leaving'), reduced.matches ? 0 : 750);
+  transitionTimer = setTimeout(() => previous.classList.remove('is-leaving'), reduced.matches ? 0 : 780);
   schedule();
 }
 document.querySelector('#prev-slide').addEventListener('click', () => go(active-1));
 document.querySelector('#next-slide').addEventListener('click', () => go(active+1));
 dots.forEach(dot => dot.addEventListener('click', () => go(Number(dot.dataset.go))));
-playButton.addEventListener('click', () => { playing = !playing; renderPlay(); schedule(); track('scenario_interaction', {action:playing?'play':'pause'}); });
 carousel.addEventListener('mouseenter', () => { hovered = true; schedule(); });
 carousel.addEventListener('mouseleave', () => { hovered = false; schedule(); });
 carousel.addEventListener('focusin', () => { focused = true; schedule(); });
@@ -82,11 +112,26 @@ windowEl.addEventListener('touchend', e => {
 }, {passive:true});
 windowEl.addEventListener('touchcancel', () => { touchStart=null; }, {passive:true});
 new IntersectionObserver(entries => { visible=entries[0].isIntersecting; schedule(); }, {threshold:0}).observe(hero);
+new IntersectionObserver(entries => {
+  slideVisible=entries[0].isIntersecting;
+  if (slideVisible && !firstScenePlayed) { firstScenePlayed=true; playConversation(slides[active]); }
+  schedule();
+}, {threshold:0.12}).observe(carousel);
 document.addEventListener('visibilitychange', schedule);
-reduced.addEventListener('change', () => { if (reduced.matches) playing=false; renderPlay(); schedule(); });
-renderPlay(); schedule();
-document.querySelector('[data-view-scenarios]').addEventListener('click', e => {
-  e.preventDefault(); stop(); carousel.scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'center'}); carousel.focus({preventScroll:true}); track('scenario_interaction', {action:'view'});
+reduced.addEventListener('change', () => { if (reduced.matches) { playing=false; clearSceneAnimations(); } schedule(); });
+schedule();
+// Reveal content once, without changing the document's scroll position.
+const revealItems = document.querySelectorAll('.section-heading, .step, .start-panel, .faq > div, .contact-copy, .contact-options');
+const revealObserver = new IntersectionObserver(entries => {
+  for (const entry of entries) if (entry.isIntersecting) {
+    entry.target.classList.add('is-revealed');
+    revealObserver.unobserve(entry.target);
+  }
+}, {threshold:0.08});
+revealItems.forEach((element, i) => {
+  element.classList.add('reveal-item');
+  element.style.setProperty('--reveal-delay', element.classList.contains('step') ? `${(i-1)%4*90}ms` : '0ms');
+  revealObserver.observe(element);
 });
 document.querySelectorAll('[data-primary-cta]').forEach(a => a.addEventListener('click', () => track('primary_cta_click')));
 const menuButton=document.querySelector('.menu-toggle'), menu=document.querySelector('#mobile-menu');
@@ -95,23 +140,48 @@ menuButton.addEventListener('click',()=> { const open=menu.hidden; menu.hidden=!
 menu.querySelectorAll('a').forEach(a=>a.addEventListener('click', closeMenu));
 document.addEventListener('keydown',e=> { if(e.key==='Escape'&&!menu.hidden){closeMenu();menuButton.focus();} });
 const form=document.querySelector('#lead-form'), status=document.querySelector('#form-status'), submit=form.querySelector('[type=submit]');
+const contactTabs = [...document.querySelectorAll('[data-contact-tab]')];
+function selectContactTab(tab) {
+  contactTabs.forEach(item => {
+    const selected = item === tab;
+    item.setAttribute('aria-selected', String(selected));
+    item.tabIndex = selected ? 0 : -1;
+    const panel = document.getElementById(item.getAttribute('aria-controls'));
+    panel.hidden = !selected;
+    if (selected && !reduced.matches) panel.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:280,easing:'ease-out'});
+  });
+  track('contact_method_select', {method:tab.dataset.contactTab});
+}
+contactTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => selectContactTab(tab));
+  tab.addEventListener('keydown', event => {
+    let next;
+    if (event.key === 'ArrowRight') next = (index + 1) % contactTabs.length;
+    if (event.key === 'ArrowLeft') next = (index + contactTabs.length - 1) % contactTabs.length;
+    if (event.key === 'Home') next = 0;
+    if (event.key === 'End') next = contactTabs.length - 1;
+    if (next === undefined) return;
+    event.preventDefault(); selectContactTab(contactTabs[next]); contactTabs[next].focus();
+  });
+});
+document.querySelectorAll('[data-messenger]').forEach(link => link.addEventListener('click', () => track('messenger_click', {method:link.dataset.messenger})));
 const field = name => form.elements.namedItem(name);
 let started=false, submitting=false;
 form.addEventListener('input',()=>{if(!started){started=true;track('form_start');}});
-field('method').addEventListener('change',()=> {
-  const method=field('method').value, contact=field('contact');
-  contact.type=method==='email'?'email':method==='phone'?'tel':'text';
-  contact.autocomplete=method==='email'?'email':method==='phone'?'tel':'off';
-  contact.placeholder=method==='email'?'mail@company.ru':method==='phone'?'+7 (___) ___-__-__':'Номер телефона или ссылка на профиль';
-  document.querySelector('#contact-label').textContent=method==='email'?'Электронная почта':method==='phone'?'Телефон':'Контакт в MAX';
-  contact.removeAttribute('aria-invalid');document.querySelector('#error-contact').textContent='';
+field('contact').addEventListener('input',()=> {
+  field('contact').removeAttribute('aria-invalid');document.querySelector('#error-contact').textContent='';
 });
+function contactMethod(value) {
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'email';
+  if (/^[+\d\s()\-]+$/.test(value) && value.replace(/\D/g,'').length >= 10 && value.replace(/\D/g,'').length <= 15) return 'phone';
+  return null;
+}
 function validate() {
-  const method=field('method').value, contact=field('contact').value.trim();
-  const errors={name:field('name').value.trim().length<2?'Укажите имя — не менее 2 символов.':'',contact:!contact?'Укажите контакт для связи.':method==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)?'Проверьте адрес электронной почты.':method==='phone'&&(!/^[+\d\s()\-]+$/.test(contact)||contact.replace(/\D/g,'').length<10||contact.replace(/\D/g,'').length>15)?'Укажите телефон: от 10 до 15 цифр.':method==='max'&&contact.length<5?'Укажите номер телефона или ссылку на профиль.':'',task:field('task').value.trim().length<10?'Опишите задачу — не менее 10 символов.':''};
-  let first;
-  for(const [name,message] of Object.entries(errors)){document.querySelector(`#error-${name}`).textContent=message;field(name).setAttribute('aria-invalid',String(!!message));if(message&&!first) first=field(name);}
-  if(first){first.focus();return false;}return true;
+  const contact=field('contact').value.trim();
+  const error=!contact?'Оставьте телефон или электронную почту.':!contactMethod(contact)?'Укажите корректный email или телефон из 10–15 цифр.':'';
+  document.querySelector('#error-contact').textContent=error;
+  field('contact').setAttribute('aria-invalid',String(!!error));
+  if(error){field('contact').focus();return false;}return true;
 }
 form.addEventListener('submit',async e=> {
   e.preventDefault(); if(submitting) return;
@@ -119,12 +189,12 @@ form.addEventListener('submit',async e=> {
   if(!config.leadEndpoint || !config.privacyPolicyUrl){ status.dataset.state='error';status.textContent='Приём заявок пока не подключён. Данные не отправлены. Для запуска нужны получатель заявок и политика обработки данных.';return; }
   submitting=true;submit.disabled=true;submit.setAttribute('aria-busy','true');status.dataset.state='sending';status.textContent='Отправляем заявку…';
   const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),15000);
-  const payload={name:field('name').value.trim(),organization:field('organization').value.trim(),method:field('method').value,contact:field('contact').value.trim(),task:field('task').value.trim(),attribution,page:location.pathname,consent:{policy:config.privacyPolicyUrl,acceptedAt:new Date().toISOString()}};
+  const payload={name:'',organization:'',method:contactMethod(field('contact').value.trim()),contact:field('contact').value.trim(),task:field('task').value.trim(),attribution,page:location.pathname,consent:{policy:config.privacyPolicyUrl,acceptedAt:new Date().toISOString()}};
   try{
     const response=await fetch(config.leadEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
     const result=await response.json();
     if(!response.ok || result.ok!==true) throw new Error('not-confirmed');
-    status.dataset.state='success';status.textContent='Спасибо! Заявка получена. Свяжемся с вами по указанному контакту.';track('lead_confirmed');form.reset();field('method').dispatchEvent(new Event('change'));started=false;
+    status.dataset.state='success';status.textContent='Спасибо! Контакт получен. Свяжемся с вами, чтобы обсудить задачу.';track('lead_confirmed');form.reset();form.querySelector('.optional-task').open=false;field('contact').removeAttribute('aria-invalid');started=false;
   }catch(error){status.dataset.state='error';status.textContent=error.name==='AbortError'?'Сервер не подтвердил отправку вовремя. Данные сохранены в форме — попробуйте ещё раз позже.':'Не удалось подтвердить отправку. Данные сохранены в форме — попробуйте ещё раз позже.';}
   finally{clearTimeout(timeout);submitting=false;submit.disabled=false;submit.removeAttribute('aria-busy');}
 });
