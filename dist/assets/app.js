@@ -16,7 +16,7 @@ function animate(element, frames, options) {
   if (reduced.matches || !element) return;
   const animation = element.animate(frames, {duration:600, easing:'cubic-bezier(.22,.7,.22,1)', ...options});
   sceneAnimations.add(animation);
-  animation.onfinish = () => sceneAnimations.delete(animation);
+  animation.onfinish = () => { if (!['both','forwards'].includes(options?.fill)) sceneAnimations.delete(animation); };
   if (document.hidden || !slideVisible) animation.pause();
   return animation;
 }
@@ -24,19 +24,17 @@ function clearSceneAnimations() {
   for (const animation of sceneAnimations) animation.cancel();
   sceneAnimations.clear();
 }
-function playConversation(slide) {
+function playConversation(slide, initial = false) {
   if (reduced.matches) return;
-  const messages = [...slide.querySelectorAll('.bubble, .demo-choices, .product-strip')];
+  const messages = [...slide.querySelectorAll('.bubble, .demo-choices, .product-strip')].filter(el => el.offsetHeight);
   messages.forEach((message, i) => animate(message, [
-    {opacity:0, transform:`translateY(14px) translateX(${message.classList.contains('user') ? 9 : -9}px) scale(.98)`},
-    {opacity:1, transform:'translateY(0) translateX(0) scale(1)'}
-  ], {duration:480, delay:220+i*160, fill:'backwards'}));
-  const deliveredAt = 220 + messages.length*160;
-  animate(slide.querySelector('.chat-status'), [{opacity:0,transform:'translateY(7px)'},{opacity:1,transform:'translateY(0)'}], {delay:deliveredAt,duration:400,fill:'backwards'});
-  animate(slide.querySelector('.staff-panel'), [{opacity:0,transform:'translate(24px,18px) scale(.97)'},{opacity:1,transform:'translate(0,0) scale(1)'}], {delay:500,duration:720,fill:'backwards'});
-  slide.querySelectorAll('dl > div').forEach((row,i) => animate(row,[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{delay:720+i*150,duration:450,fill:'backwards'}));
-  animate(slide.querySelector('.result-note'),[{opacity:0,transform:'translateY(9px)'},{opacity:1,transform:'translateY(0)'}],{delay:deliveredAt+250,duration:500,fill:'backwards'});
-  animate(slide.querySelector('.result-icon'),[{transform:'scale(.65)',opacity:0},{transform:'scale(1.12)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{delay:deliveredAt+350,duration:450,fill:'backwards'});
+    {opacity:0, transform:'translateY(10px)', filter:'blur(3px)'},
+    {opacity:1, transform:'translateY(0)', filter:'blur(0px)'}
+  ], {duration:420, delay:(initial ? 450 : 160)+i*85, fill:'backwards'}));
+  const deliveredAt = (initial ? 500 : 180) + messages.length*85;
+  animate(slide.querySelector('.chat-status'), [{opacity:0,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}], {delay:deliveredAt,duration:360,fill:'backwards'});
+  slide.querySelectorAll('dl > div').forEach((row,i) => animate(row,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{delay:350+i*85,duration:420,fill:'backwards'}));
+  animate(slide.querySelector('.result-note'),[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{delay:deliveredAt+80,duration:400,fill:'backwards'});
 }
 function schedule() {
   clearTimeout(timer);
@@ -61,15 +59,27 @@ function go(index, manual = true) {
   const target = slides[next];
   target.classList.remove('from-left'); target.classList.add('is-active'); target.removeAttribute('aria-hidden'); target.inert = false;
   const direction = index < active ? -1 : 1;
-  animate(previous, [{opacity:1,transform:'translateX(0) scale(1)'},{opacity:0,transform:`translateX(${-direction*90}px) scale(.97)`}], {duration:620});
-  animate(target, [{opacity:0,transform:`translateX(${direction*110}px) scale(.97)`},{opacity:1,transform:'translateX(0) scale(1)'}], {duration:760});
+  // Animate the two surfaces independently; the staff panel follows the phone.
+  for (const [selector, delay] of [['.chat-panel', 0], ['.staff-panel', 90]]) {
+    animate(previous.querySelector(selector), [
+      {opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0px)'},
+      {opacity:0,transform:`translateX(${-direction*48}px) scale(.97)`,filter:'blur(6px)'}
+    ], {duration:540,delay,fill:'both'});
+    animate(target.querySelector(selector), [
+      {opacity:0,transform:`translateX(${direction*56}px) scale(.97)`,filter:'blur(7px)'},
+      {opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0px)'}
+    ], {duration:720,delay:70+delay,fill:'backwards'});
+  }
+  carousel.style.setProperty('--active-scene', next);
+  hero.style.setProperty('--arc-shift', `${(next-2)*9}px`);
+  hero.style.setProperty('--arc-lift', `${(next%3-1)*7}px`);
   playConversation(target);
   active = next;
   dots.forEach((dot,i) => i===active ? dot.setAttribute('aria-current','true') : dot.removeAttribute('aria-current'));
   document.querySelector('#scenario-number').textContent = String(active+1).padStart(2,'0');
   document.querySelector('#scenario-title').textContent = target.getAttribute('aria-label').split(': ')[1];
   if (manual) document.querySelector('#carousel-announcement').textContent = target.getAttribute('aria-label');
-  transitionTimer = setTimeout(() => previous.classList.remove('is-leaving'), reduced.matches ? 0 : 780);
+  transitionTimer = setTimeout(() => previous.classList.remove('is-leaving'), reduced.matches ? 0 : 900);
   schedule();
 }
 document.querySelector('#prev-slide').addEventListener('click', () => go(active-1));
@@ -80,6 +90,7 @@ carousel.addEventListener('mouseleave', () => { hovered = false; schedule(); });
 carousel.addEventListener('focusin', () => { focused = true; schedule(); });
 carousel.addEventListener('focusout', () => { queueMicrotask(() => { focused = carousel.contains(document.activeElement); schedule(); }); });
 carousel.addEventListener('keydown', event => {
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
   if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); go(active + (event.key === 'ArrowRight' ? 1 : -1)); }
   if (event.key === 'Home') { event.preventDefault(); go(0); }
   if (event.key === 'End') { event.preventDefault(); go(slides.length-1); }
@@ -97,7 +108,7 @@ windowEl.addEventListener('touchcancel', () => { touchStart=null; }, {passive:tr
 new IntersectionObserver(entries => { visible=entries[0].isIntersecting; schedule(); }, {threshold:0}).observe(hero);
 new IntersectionObserver(entries => {
   slideVisible=entries[0].isIntersecting;
-  if (slideVisible && !firstScenePlayed) { firstScenePlayed=true; playConversation(slides[active]); }
+  if (slideVisible && !firstScenePlayed) { firstScenePlayed=true; playConversation(slides[active], true); }
   schedule();
 }, {threshold:0.12}).observe(carousel);
 document.addEventListener('visibilitychange', schedule);
@@ -107,7 +118,7 @@ reduced.addEventListener('change', () => {
 });
 schedule();
 // Reveal content once, without changing the document's scroll position.
-const revealItems = document.querySelectorAll('.section-heading, .step, .start-panel, .faq > div, .contact-copy, .contact-options');
+const revealItems = document.querySelectorAll('.section-heading, .start-panel, .faq > div, .contact-grid');
 const revealObserver = new IntersectionObserver(entries => {
   for (const entry of entries) if (entry.isIntersecting) {
     entry.target.classList.add('is-revealed');
@@ -145,5 +156,52 @@ contactTabs.forEach((tab, index) => {
     if (event.key === 'End') next = contactTabs.length - 1;
     if (next === undefined) return;
     event.preventDefault(); selectContactTab(contactTabs[next]); contactTabs[next].focus();
+  });
+});
+
+// One passive scroll listener; DOM reads and writes are batched in a frame.
+const header = document.querySelector('.site-header');
+const timeline = document.querySelector('.steps');
+const steps = [...timeline.querySelectorAll('.step')];
+let scrollFrame = 0;
+function updateScrollScene() {
+  scrollFrame = 0;
+  const box = timeline.getBoundingClientRect();
+  const vertical = innerWidth <= 700;
+  const travel = vertical ? Math.max(1, box.height - 80) : Math.max(260, innerHeight * .5);
+  const progress = Math.max(0, Math.min(1, (innerHeight * .76 - box.top) / travel));
+  header.classList.toggle('is-scrolled', scrollY > 24);
+  timeline.style.setProperty('--timeline-progress', reduced.matches ? 1 : progress);
+  steps.forEach((step, i) => step.classList.toggle('is-current', reduced.matches || progress >= i / 3));
+}
+function queueScrollScene() { if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScrollScene); }
+addEventListener('scroll', queueScrollScene, {passive:true});
+addEventListener('resize', queueScrollScene, {passive:true});
+reduced.addEventListener('change', queueScrollScene);
+updateScrollScene();
+
+// Keep native details semantics while animating open and close, including rapid clicks.
+document.querySelectorAll('.faq-list details').forEach(details => {
+  const summary = details.querySelector('summary');
+  const answer = details.querySelector('p');
+  let animation, desiredOpen = details.open;
+  summary.addEventListener('click', event => {
+    if (reduced.matches) {
+      if (animation) animation.cancel();
+      animation = null;
+      desiredOpen = !details.open;
+      return;
+    }
+    event.preventDefault();
+    if (!animation) desiredOpen = details.open;
+    desiredOpen = !desiredOpen;
+    const from = details.getBoundingClientRect().height;
+    if (animation) animation.cancel();
+    details.open = true;
+    details.classList.toggle('is-expanding', desiredOpen);
+    const to = desiredOpen ? details.scrollHeight : summary.getBoundingClientRect().height + 1;
+    animation = details.animate([{height:`${from}px`},{height:`${to}px`}], {duration:420,easing:'cubic-bezier(.22,.7,.22,1)'});
+    if (desiredOpen) answer.animate([{opacity:0,filter:'blur(4px)',transform:'translateY(5px)'},{opacity:1,filter:'blur(0px)',transform:'translateY(0)'}], {duration:360,delay:70,fill:'backwards'});
+    animation.onfinish = () => { details.open = desiredOpen; details.classList.remove('is-expanding'); animation = null; };
   });
 });
