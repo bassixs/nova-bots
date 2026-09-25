@@ -67,8 +67,8 @@ function playConversation(slide, initial = false) {
   if (reduced.matches) return;
   const messages = [...slide.querySelectorAll('.bubble, .demo-choices, .product-strip')].filter(el => el.offsetHeight);
   messages.forEach((message, i) => animate(message, [
-    {opacity:0, transform:'translateY(10px)', filter:'blur(3px)'},
-    {opacity:1, transform:'translateY(0)', filter:'blur(0px)'}
+    {opacity:0, transform:'translateY(10px)'},
+    {opacity:1, transform:'translateY(0)'}
   ], {duration:initial ? 420 : 300, delay:(initial ? 450 : 155)+i*(initial ? 85 : 42), fill:'backwards'}));
   const deliveredAt = initial ? 500 + messages.length*85 : 460;
   animate(slide.querySelector('.chat-status'), [{opacity:0,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}], {delay:deliveredAt,duration:initial ? 360 : 260,fill:'backwards'});
@@ -93,6 +93,7 @@ function go(index, manual = true) {
   clearTimeout(transitionTimer);
   clearSceneAnimations();
   resetAllReflections();
+  resetDepth();
   slides.forEach(s => s.classList.remove('is-leaving','from-left'));
   const previous = slides[active];
   previous.classList.remove('is-active'); previous.classList.add('is-leaving'); previous.setAttribute('aria-hidden','true'); previous.inert = true;
@@ -205,7 +206,7 @@ function selectContactTab(tab) {
   previous.hidden = false;
   previous.setAttribute('aria-hidden', 'true');
   const outgoing = previous.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-5px)'}],{duration:190,easing:'ease-out',fill:'both'});
-  const incoming = next.animate([{opacity:0,transform:'translateY(6px)',filter:'blur(3px)'},{opacity:1,transform:'translateY(0)',filter:'blur(0px)'}],{duration:360,delay:60,easing:'cubic-bezier(.22,.7,.22,1)',fill:'backwards'});
+  const incoming = next.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{duration:360,delay:60,easing:'cubic-bezier(.22,.7,.22,1)',fill:'backwards'});
   contactAnimations.push(outgoing, incoming);
   outgoing.onfinish = () => {
     if (revision !== contactRevision) return;
@@ -294,6 +295,7 @@ function resetDepth() {
 }
 carousel.addEventListener('pointermove', event => {
   if (reduced.matches || !finePointer.matches || innerWidth <= 700 || event.pointerType === 'touch') return;
+  if (event.target.closest('.showcase-footer')) { resetDepth(); return; }
   pointerPosition = {x:event.clientX, y:event.clientY};
   if (pointerFrame) return;
   pointerFrame = requestAnimationFrame(() => {
