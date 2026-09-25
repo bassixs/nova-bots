@@ -1129,6 +1129,41 @@ body::after {
 .contact-panel { grid-area:1 / 1; min-width:0; align-self:start; }
 .contact-panel[hidden] { display:none; }
 .contact-tabs button { transition:background .4s,border-color .4s,color .4s,box-shadow .4s; }
+
+/* The desktop showcase owns a viewport budget; only its interfaces scale.
+   The footer remains readable and stationary across all six scenarios. */
+@media(min-width:1151px) {
+  .hero-grid { padding-top:clamp(24px,5vh,60px); }
+  .hero-baseline { margin-top:8px; }
+  .scenario-carousel { display:flex; flex-direction:column; height:min(72svh,780px); min-height:0; align-self:start; padding:0; }
+  .demo-stage { position:relative; flex:1; min-height:0; }
+  .demo-stage-content { position:absolute; inset:0 0 auto; transform:scale(var(--demo-scale,.8)); transform-origin:top center; }
+  .slides-window { padding:10px 8px 14px; }
+  .scenario-slide { min-height:0; }
+  .chat-panel { height:auto; min-height:0; aspect-ratio:auto; align-self:stretch; }
+  .chat-body { flex:1 0 auto; overflow:visible; }
+  .staff-panel { margin-top:112px; }
+  .showcase-footer { position:relative; z-index:4; flex:none; width:calc(100% * var(--demo-scale,.8)); align-self:center; }
+  .carousel-bottom { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; column-gap:16px; min-height:54px; margin-top:0; }
+  .scenario-caption { min-width:0; }
+  .scenario-caption p { margin:6px 0 0; line-height:1.35; }
+  .carousel-controls { flex:none; align-self:center; }
+  .slide-indicators { margin-top:0; }
+  .demo-disclaimer { margin-top:0; line-height:1.5; }
+  body:not(.js-ready) .scenario-carousel { height:auto; }
+  body:not(.js-ready) .demo-stage-content { position:relative; transform:none; }
+}
+@media(min-width:1151px) and (max-height:800px) {
+  .hero-grid { padding-top:24px; padding-bottom:24px; }
+  .hero-copy { padding-top:20px; }
+  .demo-stage-content .staff-panel { margin-top:84px; }
+  .demo-stage-content .staff-top { min-height:70px; padding:14px 18px; }
+  .demo-stage-content .staff-top > span:first-child { flex-direction:row; align-items:center; gap:12px; }
+  .demo-stage-content .staff-content { padding:18px; }
+  .demo-stage-content .staff-content dl { margin-top:18px; }
+  .demo-stage-content .result-note { margin-top:16px; padding-top:14px; }
+  .demo-stage-content .scenario-next-step { margin-top:12px; padding-top:12px; }
+}
 @media(max-width:1150px) and (min-width:701px) {
   .hero-grid { grid-template-areas:'copy' 'conversion' 'demo'; row-gap:0; }
   .scenario-carousel { margin-top:60px; }

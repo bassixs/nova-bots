@@ -5,6 +5,26 @@ document.body.classList.add('site-entered');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const hero = document.querySelector('.hero');
 const carousel = document.querySelector('#scenarios');
+// Measure the untransformed, stacked six-scene canvas, never the active scene.
+// Scaling affects only mockups; controls keep their normal size and position.
+const demoStage = carousel.querySelector('.demo-stage');
+const demoCanvas = carousel.querySelector('.demo-stage-content');
+const desktopShowcase = matchMedia('(min-width: 1151px)');
+let demoFitFrame = 0;
+function fitDemo() {
+  demoFitFrame = 0;
+  if (!desktopShowcase.matches) { carousel.style.removeProperty('--demo-scale'); return; }
+  const scale = Math.min(1, demoStage.clientHeight / Math.max(1, demoCanvas.offsetHeight));
+  carousel.style.setProperty('--demo-scale', String(scale));
+}
+function queueDemoFit() { if (!demoFitFrame) demoFitFrame = requestAnimationFrame(fitDemo); }
+const demoResize = new ResizeObserver(queueDemoFit);
+demoResize.observe(demoStage);
+demoResize.observe(demoCanvas);
+desktopShowcase.addEventListener('change',queueDemoFit);
+addEventListener('resize',queueDemoFit,{passive:true});
+document.fonts.ready.then(queueDemoFit);
+fitDemo();
 const slides = [...document.querySelectorAll('[data-slide]')];
 slides.forEach((slide, i) => { if (i) { slide.setAttribute('aria-hidden','true'); slide.inert=true; } });
 const dots = [...document.querySelectorAll('[data-go]')];
