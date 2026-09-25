@@ -78,13 +78,13 @@ function go(index, manual = true) {
   target.classList.remove('from-left'); target.classList.add('is-active'); target.removeAttribute('aria-hidden'); target.inert = false;
   const direction = index < active ? -1 : 1;
   // Animate the two surfaces independently; the staff panel follows the phone.
-  for (const [selector, delay] of [['.chat-panel', 0], ['.staff-panel', 120]]) {
+  for (const [selector, delay] of [['.chat-panel', 0], ['.staff-panel', 100]]) {
     animate(previous.querySelector(selector), [
       {opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0px)'},
-      {opacity:0,transform:`translateX(${-direction*44}px) scale(.97)`,filter:'blur(10px)'}
+      {opacity:0,transform:`translateX(${-direction*24}px) scale(.98)`,filter:'blur(8px)'}
     ], {duration:330,delay:delay ? 80 : 0,fill:'both'});
     animate(target.querySelector(selector), [
-      {opacity:0,transform:`translateX(${direction*48}px) scale(.97)`,filter:'blur(10px)'},
+      {opacity:0,transform:`translateX(${direction*24}px) scale(.98)`,filter:'blur(8px)'},
       {opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0px)'}
     ], {duration:500,delay:120+delay,fill:'backwards'});
   }

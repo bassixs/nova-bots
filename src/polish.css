@@ -19,7 +19,8 @@ body::after {
 .scenario-caption { clip-path:inset(-2px -4px); }
 .scenario-next-step { border-top:1px solid #bdcfff1a; margin-top:18px; padding-top:15px; font-size:11px; line-height:1.65; }
 .scenario-next-step p { margin:0 0 5px; color:#9caac2; }
-.scenario-next-step a { display:block; color:#dae5ff; text-decoration:none; transition:color .3s; }
+.scenario-next-step p:first-child { color:#dce5f5; font-weight:500; }
+.scenario-next-step a { display:inline-flex; align-items:center; min-height:44px; color:#dae5ff; text-decoration:none; transition:color .3s; }
 .scenario-next-step a:hover { color:#fff; }
 .scenario-next-step a span { display:inline-block; margin-left:3px; transition:translate .3s; }
 .scenario-next-step a:hover span { translate:3px 0; }
