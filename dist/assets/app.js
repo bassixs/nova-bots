@@ -32,7 +32,7 @@ fitDemo();
 const slides = [...document.querySelectorAll('[data-slide]')];
 slides.forEach((slide, i) => { if (i) { slide.setAttribute('aria-hidden','true'); slide.inert=true; } });
 const dots = [...document.querySelectorAll('[data-go]')];
-let active = 0, playing = !reduced.matches, visible = true, slideVisible = false, hovered = false, focused = false, timer;
+let active = 0, playing = !reduced.matches, visible = true, slideVisible = false, hovered = false, focused = false, scrolling = false, timer;
 let sixthReachedTracked = false;
 let transitionTimer, captionTimer, captionAnimation;
 const caption = document.querySelector('.scenario-caption');
@@ -84,7 +84,7 @@ function schedule() {
     if (document.hidden || !slideVisible) animation.pause();
     else if (animation.playState === 'paused') animation.play();
   }
-  const running = playing && visible && slideVisible && !document.hidden && !hovered && !focused && !reduced.matches;
+  const running = playing && visible && slideVisible && !document.hidden && !hovered && !focused && !scrolling && !reduced.matches;
   carousel.classList.toggle('is-auto-running', running);
   if (running) timer = setTimeout(() => { go(active + 1, false); }, 5500);
 }
@@ -248,9 +248,10 @@ document.querySelectorAll('.messenger-panel .messenger-link[href]').forEach(link
 // One passive scroll listener; DOM reads and writes are batched in a frame.
 const header = document.querySelector('.site-header');
 const timeline = document.querySelector('.steps');
+const timelineFill = timeline.querySelector('.timeline-track > span');
 const steps = [...timeline.querySelectorAll('.step')];
 let scrollFrame = 0;
-let lastHeaderScrolled, lastTimelineProgress, lastCurrentStep, lastReduced, lastLightTravel;
+let lastHeaderScrolled, lastTimelineProgress, lastTimelineVertical, lastCurrentStep, lastReduced;
 function updateScrollScene() {
   scrollFrame = 0;
   const box = timeline.getBoundingClientRect();
@@ -263,9 +264,10 @@ function updateScrollScene() {
     lastHeaderScrolled = headerScrolled;
   }
   const timelineProgress = reduced.matches ? 1 : progress;
-  if (timelineProgress !== lastTimelineProgress) {
-    timeline.style.setProperty('--timeline-progress', timelineProgress);
+  if (timelineProgress !== lastTimelineProgress || vertical !== lastTimelineVertical) {
+    timelineFill.style.transform = `${vertical ? 'scaleY' : 'scaleX'}(${timelineProgress})`;
     lastTimelineProgress = timelineProgress;
+    lastTimelineVertical = vertical;
   }
   const currentStep = Math.min(3, Math.floor(progress * 3 + .001));
   if (currentStep !== lastCurrentStep || reduced.matches !== lastReduced) {
@@ -277,16 +279,16 @@ function updateScrollScene() {
     lastCurrentStep = currentStep;
     lastReduced = reduced.matches;
   }
-  // Small bounded movement; the same light continues into the process section.
-  const lightTravel = reduced.matches || innerWidth <= 700 ? 0 : Math.round(Math.min(scrollY, 1600) * .018);
-  if (lightTravel !== lastLightTravel) {
-    hero.style.setProperty('--scroll-light', `${lightTravel}px`);
-    lastLightTravel = lightTravel;
-  }
-
 }
 function queueScrollScene() { if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScrollScene); }
-addEventListener('scroll', queueScrollScene, {passive:true});
+let scrollIdleTimer;
+function onScroll() {
+  if (!scrolling) { scrolling = true; schedule(); }
+  clearTimeout(scrollIdleTimer);
+  scrollIdleTimer = setTimeout(() => { scrolling = false; schedule(); }, 180);
+  queueScrollScene();
+}
+addEventListener('scroll', onScroll, {passive:true});
 addEventListener('resize', queueScrollScene, {passive:true});
 reduced.addEventListener('change', queueScrollScene);
 updateScrollScene();

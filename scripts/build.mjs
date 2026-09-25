@@ -58,7 +58,7 @@ await copyFile('public/.htaccess', 'dist/.htaccess');
 for (const asset of ['favicon.ico', 'apple-touch-icon.png']) await copyFile(`public/${asset}`, `dist/${asset}`);
 for (const asset of [
   'nova-intro.mp4', 'outdoor-tables-triptych.webp', 'nova-logo.png', 'nova-logo-display.webp',
-  'nova-og.png', 'favicon.svg', 'favicon-32.png', 'icon-192.png', 'icon-512.png',
+  'nova-og.png', 'grain.png', 'favicon.svg', 'favicon-32.png', 'icon-192.png', 'icon-512.png',
   'manrope-cyrillic.woff2', 'manrope-latin.woff2', 'OFL-Manrope.txt',
   'unbounded-cyrillic.woff2', 'unbounded-latin.woff2', 'OFL-Unbounded.txt',
 ]) await copyFile(`public/assets/${asset}`, `dist/assets/${asset}`);
