@@ -9,7 +9,24 @@ const slides = [...document.querySelectorAll('[data-slide]')];
 slides.forEach((slide, i) => { if (i) { slide.setAttribute('aria-hidden','true'); slide.inert=true; } });
 const dots = [...document.querySelectorAll('[data-go]')];
 let active = 0, playing = !reduced.matches, visible = true, slideVisible = false, hovered = false, focused = false, timer;
-let transitionTimer;
+let transitionTimer, captionTimer, captionAnimation;
+const caption = document.querySelector('.scenario-caption');
+function updateCaption() {
+  document.querySelector('#scenario-number').textContent = String(active+1).padStart(2,'0');
+  document.querySelector('#scenario-title').textContent = slides[active].getAttribute('aria-label').split(': ')[1];
+}
+function transitionCaption() {
+  clearTimeout(captionTimer);
+  captionAnimation?.cancel();
+  if (reduced.matches) { updateCaption(); return; }
+  captionAnimation = caption.animate([
+    {opacity:1,transform:'translateY(0)',offset:0},
+    {opacity:0,transform:'translateY(-9px)',offset:.2},
+    {opacity:0,transform:'translateY(9px)',offset:.24},
+    {opacity:1,transform:'translateY(0)',offset:1}
+  ], {duration:500,easing:'cubic-bezier(.22,.7,.22,1)'});
+  captionTimer = setTimeout(updateCaption,110);
+}
 const sceneAnimations = new Set();
 let firstScenePlayed = false;
 function animate(element, frames, options) {
@@ -31,9 +48,9 @@ function playConversation(slide, initial = false) {
     {opacity:0, transform:'translateY(10px)', filter:'blur(3px)'},
     {opacity:1, transform:'translateY(0)', filter:'blur(0px)'}
   ], {duration:initial ? 420 : 300, delay:(initial ? 450 : 155)+i*(initial ? 85 : 42), fill:'backwards'}));
-  const deliveredAt = initial ? 500 + messages.length*85 : 390;
+  const deliveredAt = initial ? 500 + messages.length*85 : 460;
   animate(slide.querySelector('.chat-status'), [{opacity:0,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}], {delay:deliveredAt,duration:initial ? 360 : 260,fill:'backwards'});
-  slide.querySelectorAll('dl > div').forEach((row,i) => animate(row,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{delay:260+i*65,duration:300,fill:'backwards'}));
+  slide.querySelectorAll('dl > div').forEach((row,i) => animate(row,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{delay:320+i*55,duration:280,fill:'backwards'}));
   animate(slide.querySelector('.result-note'),[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{delay:deliveredAt+40,duration:initial ? 400 : 260,fill:'backwards'});
 }
 function schedule() {
@@ -44,7 +61,7 @@ function schedule() {
   }
   const running = playing && visible && slideVisible && !document.hidden && !hovered && !focused && !reduced.matches;
   carousel.classList.toggle('is-auto-running', running);
-  if (running) timer = setTimeout(() => { go(active + 1, false); }, 7000);
+  if (running) timer = setTimeout(() => { go(active + 1, false); }, 5500);
 }
 function stop() { playing = false; schedule(); }
 function go(index, manual = true) {
@@ -61,31 +78,34 @@ function go(index, manual = true) {
   target.classList.remove('from-left'); target.classList.add('is-active'); target.removeAttribute('aria-hidden'); target.inert = false;
   const direction = index < active ? -1 : 1;
   // Animate the two surfaces independently; the staff panel follows the phone.
-  for (const [selector, delay] of [['.chat-panel', 0], ['.staff-panel', 100]]) {
+  for (const [selector, delay] of [['.chat-panel', 0], ['.staff-panel', 120]]) {
     animate(previous.querySelector(selector), [
       {opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0px)'},
-      {opacity:0,transform:`translateX(${-direction*48}px) scale(.97)`,filter:'blur(6px)'}
-    ], {duration:330,delay:delay*.4,fill:'both'});
+      {opacity:0,transform:`translateX(${-direction*44}px) scale(.97)`,filter:'blur(10px)'}
+    ], {duration:330,delay:delay ? 80 : 0,fill:'both'});
     animate(target.querySelector(selector), [
-      {opacity:0,transform:`translateX(${direction*56}px) scale(.97)`,filter:'blur(10px)'},
+      {opacity:0,transform:`translateX(${direction*48}px) scale(.97)`,filter:'blur(10px)'},
       {opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0px)'}
-    ], {duration:500,delay:100+delay,fill:'backwards'});
+    ], {duration:500,delay:120+delay,fill:'backwards'});
   }
   carousel.style.setProperty('--active-scene', next);
   hero.style.setProperty('--arc-shift', `${(next-2)*5}px`);
   hero.style.setProperty('--arc-lift', `${(next%3-1)*4}px`);
   playConversation(target);
   active = next;
-  dots.forEach((dot,i) => i===active ? dot.setAttribute('aria-current','true') : dot.removeAttribute('aria-current'));
-  document.querySelector('#scenario-number').textContent = String(active+1).padStart(2,'0');
-  document.querySelector('#scenario-title').textContent = target.getAttribute('aria-label').split(': ')[1];
+  dots.forEach((dot,i) => {
+    if (i===active) dot.setAttribute('aria-current','true'); else dot.removeAttribute('aria-current');
+    dot.classList.toggle('is-passed',i<active);
+  });
+  transitionCaption();
   if (manual) document.querySelector('#carousel-announcement').textContent = target.getAttribute('aria-label');
-  transitionTimer = setTimeout(() => previous.classList.remove('is-leaving'), reduced.matches ? 0 : 720);
+  transitionTimer = setTimeout(() => previous.classList.remove('is-leaving'), reduced.matches ? 0 : 760);
   schedule();
 }
 document.querySelector('#prev-slide').addEventListener('click', () => go(active-1));
 document.querySelector('#next-slide').addEventListener('click', () => go(active+1));
 dots.forEach(dot => dot.addEventListener('click', () => go(Number(dot.dataset.go))));
+carousel.addEventListener('pointerdown', stop, {passive:true});
 carousel.addEventListener('mouseenter', () => { hovered = true; schedule(); });
 carousel.addEventListener('mouseleave', () => { hovered = false; schedule(); });
 carousel.addEventListener('focusin', () => { focused = true; schedule(); });
@@ -114,7 +134,10 @@ new IntersectionObserver(entries => {
 }, {threshold:0.12}).observe(carousel);
 document.addEventListener('visibilitychange', schedule);
 reduced.addEventListener('change', () => {
-  if (reduced.matches) { playing=false; clearSceneAnimations(); }
+  if (reduced.matches) {
+    playing=false; clearSceneAnimations(); clearTimeout(captionTimer); captionAnimation?.cancel(); updateCaption();
+    slides.forEach(slide => slide.classList.remove('is-leaving'));
+  }
   schedule();
 });
 schedule();
@@ -247,22 +270,23 @@ function resetDepth() {
   cancelAnimationFrame(pointerFrame); pointerFrame = 0;
   for (const name of ['--depth-x','--depth-y','--arc-pointer-x','--arc-pointer-y','--ambient-x','--ambient-y']) hero.style.setProperty(name,'0px');
 }
-hero.addEventListener('pointermove', event => {
+carousel.addEventListener('pointermove', event => {
   if (reduced.matches || !finePointer.matches || innerWidth <= 700 || event.pointerType === 'touch') return;
   pointerPosition = {x:event.clientX, y:event.clientY};
   if (pointerFrame) return;
   pointerFrame = requestAnimationFrame(() => {
     pointerFrame = 0;
     if (!pointerPosition) return;
-    const bounds = hero.getBoundingClientRect();
+    const bounds = carousel.getBoundingClientRect();
     const x = Math.max(-1,Math.min(1,(pointerPosition.x-bounds.left)/bounds.width*2-1));
-    const y = Math.max(-1,Math.min(1,(pointerPosition.y-bounds.top)/Math.min(bounds.height,innerHeight)*2-1));
+    const y = Math.max(-1,Math.min(1,(pointerPosition.y-bounds.top)/bounds.height*2-1));
     hero.style.setProperty('--depth-x',`${x*7}px`); hero.style.setProperty('--depth-y',`${y*7}px`);
-    hero.style.setProperty('--arc-pointer-x',`${x*5}px`); hero.style.setProperty('--arc-pointer-y',`${y*5}px`);
+    hero.style.setProperty('--arc-pointer-x',`${x*2.5}px`); hero.style.setProperty('--arc-pointer-y',`${y*2.5}px`);
     hero.style.setProperty('--ambient-x',`${x*2}px`); hero.style.setProperty('--ambient-y',`${y*2}px`);
   });
 }, {passive:true});
-hero.addEventListener('pointerleave', resetDepth);
+carousel.addEventListener('pointerleave', resetDepth);
+addEventListener('resize', resetDepth, {passive:true});
 reduced.addEventListener('change',resetDepth);
 finePointer.addEventListener('change',resetDepth);
 const glassCards = [...document.querySelectorAll('.chat-panel,.staff-panel,.contact-grid')];
