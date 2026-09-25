@@ -22,6 +22,7 @@ export function runIntro() {
       document.removeEventListener('keydown', onKey);
       motion.removeEventListener('change', finish);
       try { sessionStorage.setItem('nova-intro-seen', '1'); } catch { /* Storage is optional. */ }
+      document.body.classList.add('intro-played');
       overlay.classList.add('is-closing');
       setTimeout(() => {
         root.classList.remove('intro-pending');
@@ -44,7 +45,7 @@ export function runIntro() {
     video.addEventListener('waiting', guardLoading);
     video.addEventListener('playing', () => { clearTimeout(loadingTimer); overlay.classList.add('is-playing'); });
     video.muted = true;
-    video.src = '/assets/nova-intro.mp4';
+    video.src = '/assets/nova-intro.mp4?v=2';
     guardLoading();
     endTimer = setTimeout(finish, 15000);
     video.play().catch(finish);

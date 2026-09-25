@@ -1,4 +1,4 @@
-import { runIntro } from './intro.js';
+import { runIntro } from './intro.js?v=2';
 import { initAnalytics, trackGoal } from './analytics.js';
 initAnalytics();
 document.body.classList.add('js-ready');
@@ -250,23 +250,39 @@ const header = document.querySelector('.site-header');
 const timeline = document.querySelector('.steps');
 const steps = [...timeline.querySelectorAll('.step')];
 let scrollFrame = 0;
+let lastHeaderScrolled, lastTimelineProgress, lastCurrentStep, lastReduced, lastLightTravel;
 function updateScrollScene() {
   scrollFrame = 0;
   const box = timeline.getBoundingClientRect();
   const vertical = innerWidth <= 1100;
   const travel = vertical ? Math.max(1, box.height - 80) : Math.max(260, innerHeight * .5);
   const progress = Math.max(0, Math.min(1, (innerHeight * .76 - box.top) / travel));
-  header.classList.toggle('is-scrolled', scrollY > 24);
-  timeline.style.setProperty('--timeline-progress', reduced.matches ? 1 : progress);
+  const headerScrolled = scrollY > 24;
+  if (headerScrolled !== lastHeaderScrolled) {
+    header.classList.toggle('is-scrolled', headerScrolled);
+    lastHeaderScrolled = headerScrolled;
+  }
+  const timelineProgress = reduced.matches ? 1 : progress;
+  if (timelineProgress !== lastTimelineProgress) {
+    timeline.style.setProperty('--timeline-progress', timelineProgress);
+    lastTimelineProgress = timelineProgress;
+  }
   const currentStep = Math.min(3, Math.floor(progress * 3 + .001));
-  steps.forEach((step, i) => {
-    step.classList.toggle('is-current', i === currentStep);
-    step.classList.toggle('is-complete', i < currentStep);
-    step.classList.toggle('is-reached', reduced.matches || i <= currentStep);
-  });
+  if (currentStep !== lastCurrentStep || reduced.matches !== lastReduced) {
+    steps.forEach((step, i) => {
+      step.classList.toggle('is-current', i === currentStep);
+      step.classList.toggle('is-complete', i < currentStep);
+      step.classList.toggle('is-reached', reduced.matches || i <= currentStep);
+    });
+    lastCurrentStep = currentStep;
+    lastReduced = reduced.matches;
+  }
   // Small bounded movement; the same light continues into the process section.
-  const lightTravel = reduced.matches || innerWidth <= 700 ? 0 : Math.min(scrollY, 1600) * .018;
-  hero.style.setProperty('--scroll-light', `${lightTravel}px`);
+  const lightTravel = reduced.matches || innerWidth <= 700 ? 0 : Math.round(Math.min(scrollY, 1600) * .018);
+  if (lightTravel !== lastLightTravel) {
+    hero.style.setProperty('--scroll-light', `${lightTravel}px`);
+    lastLightTravel = lightTravel;
+  }
 
 }
 function queueScrollScene() { if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScrollScene); }
@@ -306,10 +322,14 @@ document.querySelectorAll('.faq-list details').forEach((details, index) => {
 // Cursor response only on fine pointers. CSS eases transforms; no perpetual RAF loop.
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
 let pointerFrame = 0, pointerPosition = null;
+function setHeroDepth(name, value) {
+  const next = `${Math.round(value * 2) / 2}px`;
+  if (hero.style.getPropertyValue(name) !== next) hero.style.setProperty(name, next);
+}
 function resetDepth() {
   pointerPosition = null;
   cancelAnimationFrame(pointerFrame); pointerFrame = 0;
-  for (const name of ['--depth-x','--depth-y','--arc-pointer-x','--arc-pointer-y','--ambient-x','--ambient-y']) hero.style.setProperty(name,'0px');
+  for (const name of ['--depth-x','--depth-y','--arc-pointer-x','--arc-pointer-y','--ambient-x','--ambient-y']) setHeroDepth(name, 0);
 }
 carousel.addEventListener('pointermove', event => {
   if (reduced.matches || !finePointer.matches || innerWidth <= 700 || event.pointerType === 'touch') return;
@@ -322,9 +342,9 @@ carousel.addEventListener('pointermove', event => {
     const bounds = carousel.getBoundingClientRect();
     const x = Math.max(-1,Math.min(1,(pointerPosition.x-bounds.left)/bounds.width*2-1));
     const y = Math.max(-1,Math.min(1,(pointerPosition.y-bounds.top)/bounds.height*2-1));
-    hero.style.setProperty('--depth-x',`${x*4.5}px`); hero.style.setProperty('--depth-y',`${y*4.5}px`);
-    hero.style.setProperty('--arc-pointer-x',`${x*2.5}px`); hero.style.setProperty('--arc-pointer-y',`${y*2.5}px`);
-    hero.style.setProperty('--ambient-x',`${x*1.5}px`); hero.style.setProperty('--ambient-y',`${y*1.5}px`);
+    setHeroDepth('--depth-x',x*4.5); setHeroDepth('--depth-y',y*4.5);
+    setHeroDepth('--arc-pointer-x',x*2.5); setHeroDepth('--arc-pointer-y',y*2.5);
+    setHeroDepth('--ambient-x',x*1.5); setHeroDepth('--ambient-y',y*1.5);
   });
 }, {passive:true});
 carousel.addEventListener('pointerleave', resetDepth);
@@ -344,8 +364,8 @@ glassCards.forEach(card => {
     frame=requestAnimationFrame(() => {
       frame=0;
       const rect=card.getBoundingClientRect();
-      card.style.setProperty('--reflection-x',`${(point.x-rect.left-rect.width/2)*.35}px`);
-      card.style.setProperty('--reflection-y',`${(point.y-rect.top-rect.height/2)*.35}px`);
+      card.style.setProperty('--reflection-x',`${Math.round((point.x-rect.left-rect.width/2)*.35/4)*4}px`);
+      card.style.setProperty('--reflection-y',`${Math.round((point.y-rect.top-rect.height/2)*.35/4)*4}px`);
       card.classList.add('has-reflection');
     });
   },{passive:true});

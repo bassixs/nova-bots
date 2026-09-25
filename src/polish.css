@@ -292,6 +292,22 @@ body::after { opacity:.01; }
 @keyframes nova-glass-entry { from { opacity:0; translate:0 8px; } to { opacity:1; translate:0 0; } }
 @keyframes nova-refraction-settle { from { translate:8px -4px; opacity:0; } to { translate:0 0; opacity:.18; } }
 
+/* The opening film already provides the reveal; avoid a second delayed entrance. */
+.intro-played.site-entered .site-header .brand,
+.intro-played.site-entered .site-header nav,
+.intro-played.site-entered .site-header > .button,
+.intro-played.site-entered .menu-toggle,
+.intro-played.site-entered .hero-copy .eyebrow,
+.intro-played.site-entered .headline-line > span,
+.intro-played.site-entered .hero-description,
+.intro-played.site-entered .hero-actions,
+.intro-played.site-entered .hero-services,
+.intro-played.site-entered .scenario-carousel,
+.intro-played.showcase-entering .hero-arc,
+.intro-played.showcase-entering .scenario-slide[data-slide="0"] .staff-panel,
+.intro-played.showcase-entering .optical-caustic-one,
+.intro-played.showcase-entering .optical-caustic-two { animation:none!important; }
+
 /* The desktop mockups share one large optical canvas. Its height budget still
    includes the fixed caption, progress and controls in the first viewport. */
 @media(min-width:1151px) {
