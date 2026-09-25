@@ -1,6 +1,7 @@
 import { runIntro } from './intro.js';
 document.body.classList.add('js-ready');
 await runIntro();
+document.body.classList.add('site-entered');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const hero = document.querySelector('.hero');
 const carousel = document.querySelector('#scenarios');
@@ -25,7 +26,7 @@ function clearSceneAnimations() {
 }
 function playConversation(slide) {
   if (reduced.matches) return;
-  const messages = [...slide.querySelectorAll('.bubble, .demo-choices')];
+  const messages = [...slide.querySelectorAll('.bubble, .demo-choices, .product-strip')];
   messages.forEach((message, i) => animate(message, [
     {opacity:0, transform:`translateY(14px) translateX(${message.classList.contains('user') ? 9 : -9}px) scale(.98)`},
     {opacity:1, transform:'translateY(0) translateX(0) scale(1)'}

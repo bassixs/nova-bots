@@ -1,4 +1,4 @@
-export const scenarios = [
+const scenarioCatalog = [
   {
     "title": "Заявка на расчёт",
     "category": "Бизнес · мебель на заказ",
@@ -191,5 +191,10 @@ export const scenarios = [
     "result": "Редактор получает комплект материалов",
     "icon": "file"
   }
-]
-;
+];
+
+export const scenarios = [
+  scenarioCatalog[3],
+  ...scenarioCatalog.slice(0, 3),
+  ...scenarioCatalog.slice(4)
+];
