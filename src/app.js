@@ -30,11 +30,11 @@ function playConversation(slide, initial = false) {
   messages.forEach((message, i) => animate(message, [
     {opacity:0, transform:'translateY(10px)', filter:'blur(3px)'},
     {opacity:1, transform:'translateY(0)', filter:'blur(0px)'}
-  ], {duration:420, delay:(initial ? 450 : 160)+i*85, fill:'backwards'}));
-  const deliveredAt = (initial ? 500 : 180) + messages.length*85;
-  animate(slide.querySelector('.chat-status'), [{opacity:0,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}], {delay:deliveredAt,duration:360,fill:'backwards'});
-  slide.querySelectorAll('dl > div').forEach((row,i) => animate(row,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{delay:350+i*85,duration:420,fill:'backwards'}));
-  animate(slide.querySelector('.result-note'),[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{delay:deliveredAt+80,duration:400,fill:'backwards'});
+  ], {duration:initial ? 420 : 300, delay:(initial ? 450 : 155)+i*(initial ? 85 : 42), fill:'backwards'}));
+  const deliveredAt = initial ? 500 + messages.length*85 : 390;
+  animate(slide.querySelector('.chat-status'), [{opacity:0,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}], {delay:deliveredAt,duration:initial ? 360 : 260,fill:'backwards'});
+  slide.querySelectorAll('dl > div').forEach((row,i) => animate(row,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{delay:260+i*65,duration:300,fill:'backwards'}));
+  animate(slide.querySelector('.result-note'),[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{delay:deliveredAt+40,duration:initial ? 400 : 260,fill:'backwards'});
 }
 function schedule() {
   clearTimeout(timer);
@@ -53,6 +53,7 @@ function go(index, manual = true) {
   if (next === active) { schedule(); return; }
   clearTimeout(transitionTimer);
   clearSceneAnimations();
+  resetAllReflections();
   slides.forEach(s => s.classList.remove('is-leaving','from-left'));
   const previous = slides[active];
   previous.classList.remove('is-active'); previous.classList.add('is-leaving'); previous.setAttribute('aria-hidden','true'); previous.inert = true;
@@ -60,26 +61,26 @@ function go(index, manual = true) {
   target.classList.remove('from-left'); target.classList.add('is-active'); target.removeAttribute('aria-hidden'); target.inert = false;
   const direction = index < active ? -1 : 1;
   // Animate the two surfaces independently; the staff panel follows the phone.
-  for (const [selector, delay] of [['.chat-panel', 0], ['.staff-panel', 90]]) {
+  for (const [selector, delay] of [['.chat-panel', 0], ['.staff-panel', 100]]) {
     animate(previous.querySelector(selector), [
       {opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0px)'},
       {opacity:0,transform:`translateX(${-direction*48}px) scale(.97)`,filter:'blur(6px)'}
-    ], {duration:540,delay,fill:'both'});
+    ], {duration:330,delay:delay*.4,fill:'both'});
     animate(target.querySelector(selector), [
-      {opacity:0,transform:`translateX(${direction*56}px) scale(.97)`,filter:'blur(7px)'},
+      {opacity:0,transform:`translateX(${direction*56}px) scale(.97)`,filter:'blur(10px)'},
       {opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0px)'}
-    ], {duration:720,delay:70+delay,fill:'backwards'});
+    ], {duration:500,delay:100+delay,fill:'backwards'});
   }
   carousel.style.setProperty('--active-scene', next);
-  hero.style.setProperty('--arc-shift', `${(next-2)*9}px`);
-  hero.style.setProperty('--arc-lift', `${(next%3-1)*7}px`);
+  hero.style.setProperty('--arc-shift', `${(next-2)*5}px`);
+  hero.style.setProperty('--arc-lift', `${(next%3-1)*4}px`);
   playConversation(target);
   active = next;
   dots.forEach((dot,i) => i===active ? dot.setAttribute('aria-current','true') : dot.removeAttribute('aria-current'));
   document.querySelector('#scenario-number').textContent = String(active+1).padStart(2,'0');
   document.querySelector('#scenario-title').textContent = target.getAttribute('aria-label').split(': ')[1];
   if (manual) document.querySelector('#carousel-announcement').textContent = target.getAttribute('aria-label');
-  transitionTimer = setTimeout(() => previous.classList.remove('is-leaving'), reduced.matches ? 0 : 900);
+  transitionTimer = setTimeout(() => previous.classList.remove('is-leaving'), reduced.matches ? 0 : 720);
   schedule();
 }
 document.querySelector('#prev-slide').addEventListener('click', () => go(active-1));
@@ -136,19 +137,42 @@ menuButton.addEventListener('click',()=> { const open=menu.hidden; menu.hidden=!
 menu.querySelectorAll('a').forEach(a=>a.addEventListener('click', closeMenu));
 document.addEventListener('keydown',e=> { if(e.key==='Escape'&&!menu.hidden){closeMenu();menuButton.focus();} });
 const contactTabs = [...document.querySelectorAll('[data-contact-tab]')];
+let contactRevision = 0;
+let contactAnimations = [];
 function selectContactTab(tab) {
+  if (tab.getAttribute('aria-selected') === 'true') return;
+  const revision = ++contactRevision;
+  const previousTab = contactTabs.find(item => item.getAttribute('aria-selected') === 'true');
+  const previous = document.getElementById(previousTab.getAttribute('aria-controls'));
+  const next = document.getElementById(tab.getAttribute('aria-controls'));
+  contactAnimations.forEach(animation => animation.cancel());
+  contactAnimations = [];
   contactTabs.forEach(item => {
     const selected = item === tab;
     item.setAttribute('aria-selected', String(selected));
     item.tabIndex = selected ? 0 : -1;
     const panel = document.getElementById(item.getAttribute('aria-controls'));
     panel.hidden = !selected;
-    if (selected && !reduced.matches) panel.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:280,easing:'ease-out'});
+    panel.inert = !selected;
+    panel.removeAttribute('aria-hidden');
   });
+  if (reduced.matches) return;
+  previous.hidden = false;
+  previous.setAttribute('aria-hidden', 'true');
+  const outgoing = previous.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-5px)'}],{duration:190,easing:'ease-out',fill:'both'});
+  const incoming = next.animate([{opacity:0,transform:'translateY(6px)',filter:'blur(3px)'},{opacity:1,transform:'translateY(0)',filter:'blur(0px)'}],{duration:360,delay:60,easing:'cubic-bezier(.22,.7,.22,1)',fill:'backwards'});
+  contactAnimations.push(outgoing, incoming);
+  outgoing.onfinish = () => {
+    if (revision !== contactRevision) return;
+    previous.hidden = true;
+    previous.removeAttribute('aria-hidden');
+    outgoing.cancel();
+  };
 }
 contactTabs.forEach((tab, index) => {
   tab.addEventListener('click', () => selectContactTab(tab));
   tab.addEventListener('keydown', event => {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
     let next;
     if (event.key === 'ArrowRight') next = (index + 1) % contactTabs.length;
     if (event.key === 'ArrowLeft') next = (index + contactTabs.length - 1) % contactTabs.length;
@@ -172,7 +196,16 @@ function updateScrollScene() {
   const progress = Math.max(0, Math.min(1, (innerHeight * .76 - box.top) / travel));
   header.classList.toggle('is-scrolled', scrollY > 24);
   timeline.style.setProperty('--timeline-progress', reduced.matches ? 1 : progress);
-  steps.forEach((step, i) => step.classList.toggle('is-current', reduced.matches || progress >= i / 3));
+  const currentStep = Math.min(3, Math.floor(progress * 3 + .001));
+  steps.forEach((step, i) => {
+    step.classList.toggle('is-current', i === currentStep);
+    step.classList.toggle('is-complete', i < currentStep);
+    step.classList.toggle('is-reached', reduced.matches || i <= currentStep);
+  });
+  // Small bounded movement; the same light continues into the process section.
+  const lightTravel = reduced.matches || innerWidth <= 700 ? 0 : Math.min(scrollY, 1600) * .018;
+  hero.style.setProperty('--scroll-light', `${lightTravel}px`);
+
 }
 function queueScrollScene() { if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScrollScene); }
 addEventListener('scroll', queueScrollScene, {passive:true});
@@ -203,5 +236,67 @@ document.querySelectorAll('.faq-list details').forEach(details => {
     animation = details.animate([{height:`${from}px`},{height:`${to}px`}], {duration:420,easing:'cubic-bezier(.22,.7,.22,1)'});
     if (desiredOpen) answer.animate([{opacity:0,filter:'blur(4px)',transform:'translateY(5px)'},{opacity:1,filter:'blur(0px)',transform:'translateY(0)'}], {duration:360,delay:70,fill:'backwards'});
     animation.onfinish = () => { details.open = desiredOpen; details.classList.remove('is-expanding'); animation = null; };
+  });
+});
+
+// Cursor response only on fine pointers. CSS eases transforms; no perpetual RAF loop.
+const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+let pointerFrame = 0, pointerPosition = null;
+function resetDepth() {
+  pointerPosition = null;
+  cancelAnimationFrame(pointerFrame); pointerFrame = 0;
+  for (const name of ['--depth-x','--depth-y','--arc-pointer-x','--arc-pointer-y','--ambient-x','--ambient-y']) hero.style.setProperty(name,'0px');
+}
+hero.addEventListener('pointermove', event => {
+  if (reduced.matches || !finePointer.matches || innerWidth <= 700 || event.pointerType === 'touch') return;
+  pointerPosition = {x:event.clientX, y:event.clientY};
+  if (pointerFrame) return;
+  pointerFrame = requestAnimationFrame(() => {
+    pointerFrame = 0;
+    if (!pointerPosition) return;
+    const bounds = hero.getBoundingClientRect();
+    const x = Math.max(-1,Math.min(1,(pointerPosition.x-bounds.left)/bounds.width*2-1));
+    const y = Math.max(-1,Math.min(1,(pointerPosition.y-bounds.top)/Math.min(bounds.height,innerHeight)*2-1));
+    hero.style.setProperty('--depth-x',`${x*7}px`); hero.style.setProperty('--depth-y',`${y*7}px`);
+    hero.style.setProperty('--arc-pointer-x',`${x*5}px`); hero.style.setProperty('--arc-pointer-y',`${y*5}px`);
+    hero.style.setProperty('--ambient-x',`${x*2}px`); hero.style.setProperty('--ambient-y',`${y*2}px`);
+  });
+}, {passive:true});
+hero.addEventListener('pointerleave', resetDepth);
+reduced.addEventListener('change',resetDepth);
+finePointer.addEventListener('change',resetDepth);
+const glassCards = [...document.querySelectorAll('.chat-panel,.staff-panel,.contact-grid')];
+const resetReflections = [];
+glassCards.forEach(card => {
+  let frame = 0, point;
+  const reset = () => { cancelAnimationFrame(frame); frame=0; card.classList.remove('has-reflection'); card.style.setProperty('--reflection-x','0px'); card.style.setProperty('--reflection-y','0px'); };
+  resetReflections.push(reset);
+  card.addEventListener('pointermove', event => {
+    if (reduced.matches || !finePointer.matches || innerWidth <= 700 || event.pointerType === 'touch') return;
+    point={x:event.clientX,y:event.clientY};
+    if (frame) return;
+    frame=requestAnimationFrame(() => {
+      frame=0;
+      const rect=card.getBoundingClientRect();
+      card.style.setProperty('--reflection-x',`${(point.x-rect.left-rect.width/2)*.35}px`);
+      card.style.setProperty('--reflection-y',`${(point.y-rect.top-rect.height/2)*.35}px`);
+      card.classList.add('has-reflection');
+    });
+  },{passive:true});
+  card.addEventListener('pointerleave',reset);
+});
+function resetAllReflections() { resetReflections.forEach(reset=>reset()); }
+reduced.addEventListener('change',resetAllReflections);
+finePointer.addEventListener('change',resetAllReflections);
+
+reduced.addEventListener('change', () => {
+  if (!reduced.matches) return;
+  ++contactRevision;
+  contactAnimations.forEach(animation=>animation.cancel());
+  contactAnimations=[];
+  contactTabs.forEach(tab => {
+    const panel=document.getElementById(tab.getAttribute('aria-controls'));
+    const selected=tab.getAttribute('aria-selected')==='true';
+    panel.hidden=!selected; panel.inert=!selected; panel.removeAttribute('aria-hidden');
   });
 });
