@@ -291,3 +291,51 @@ body::after { opacity:.01; }
 @keyframes nova-arc-light { from { opacity:.28; filter:brightness(.5); } to { opacity:1; filter:brightness(1); } }
 @keyframes nova-glass-entry { from { opacity:0; filter:blur(8px); } to { opacity:1; filter:blur(0); } }
 @keyframes nova-refraction-settle { from { translate:8px -4px; opacity:0; } to { translate:0 0; opacity:.18; } }
+
+/* The desktop mockups share one large optical canvas. Its height budget still
+   includes the fixed caption, progress and controls in the first viewport. */
+@media(min-width:1151px) {
+  .scenario-carousel { height:min(calc(100svh - 153px),820px); }
+  .demo-stage-content {
+    left:-57px; right:auto; width:calc(100% + 120px);
+    transform-origin:top center;
+  }
+  .scenario-slide { grid-template-columns:minmax(0,1.13fr) minmax(0,.87fr); }
+  .staff-panel {
+    width:calc(100% + 68px); margin-left:-56px; margin-top:128px;
+    background:radial-gradient(ellipse at 77% 25%,#87a3ff20,transparent 42%),
+      linear-gradient(114deg,#d2e2ff0b 0%,#0a112049 30%,#070a124c 68%,#879fff10 100%);
+    border:1px solid #e1ebff34;
+    box-shadow:inset 0 1px 0 #f4f8ff7a,inset 1px 0 0 #c8dcff26,
+      inset 0 -1px 0 #718de03a,0 36px 82px #000b,17px 14px 42px #060d245c;
+    -webkit-backdrop-filter:blur(42px) saturate(135%);
+    backdrop-filter:blur(42px) saturate(135%);
+  }
+  .staff-panel::before {
+    background:linear-gradient(107deg,transparent 19%,#e8f0ff0b 29%,transparent 43%,
+      #88a7ff20 68%,#c3d7ff11 73%,transparent 84%),
+      radial-gradient(ellipse at 74% 23%,#a2baff1c,transparent 47%);
+  }
+  .chat-panel {
+    box-shadow:inset 0 1px 1px #eff6ff8a,inset 1px 0 0 #d6e5ff12,
+      inset -2px 0 8px #7898ff59,0 0 0 3px #06091170,
+      0 32px 76px #000a,10px 3px 22px #7396ff10;
+  }
+  .showcase-footer { width:calc((100% + 75px) * var(--demo-scale,.8)); translate:-15px 0; }
+  .scenario-carousel .demo-editorial { left:63%; top:65px; }
+  .hero-ambient {
+    background:radial-gradient(ellipse 29% 23% at 76% 31%,#678bfa14,transparent 82%),
+      radial-gradient(ellipse 25% 18% at 81% 47%,#7778d30b,transparent 80%);
+  }
+  .hero-arc {
+    transform-origin:66% 31%;
+    transform:translate(calc(var(--arc-shift,0px) + var(--arc-pointer-x,0px) - 90px),calc(var(--arc-lift,0px) + var(--arc-pointer-y,0px) + var(--scroll-light,0px) - 20px)) scale(1.18) rotate(-10deg);
+  }
+}
+@media(min-width:1151px) and (max-height:800px) {
+  .scenario-carousel { height:calc(100svh - 130px); margin-top:-8px; }
+  .demo-stage-content .staff-panel { margin-top:104px; }
+}
+@media(prefers-reduced-motion:reduce) and (min-width:1151px) {
+  .hero-arc { transform:translate(-90px,-20px) scale(1.18) rotate(-10deg); }
+}
