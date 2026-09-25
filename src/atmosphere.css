@@ -132,7 +132,7 @@ body { background: #05080d; }
 .demo-disclaimer { color: #8f9fba; font-size: 11px; line-height: 1.5; }
 .product-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin: 10px 0; }
 .product-card { min-width: 0; overflow: hidden; border-radius: 10px; border: 1px solid #91abd522; background: #1a233180; }
-.product-photo { display: block; height: 77px; background: url('/assets/outdoor-tables-triptych.png') 0% center / 300% 100% no-repeat; }
+.product-photo { display: block; height: 77px; background: url('/assets/outdoor-tables-triptych.webp') 0% center / 300% 100% no-repeat; }
 .product-photo-two { background-position: 50% center; }
 .product-photo-three { background-position: 100% center; }
 .product-card > span:last-child { display: block; padding: 6px; font-size: 8px; line-height: 1.45; }

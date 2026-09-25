@@ -1,4 +1,6 @@
 import { runIntro } from './intro.js';
+import { initAnalytics, trackGoal } from './analytics.js';
+initAnalytics();
 document.body.classList.add('js-ready');
 await runIntro();
 document.body.classList.add('site-entered');
@@ -31,6 +33,7 @@ const slides = [...document.querySelectorAll('[data-slide]')];
 slides.forEach((slide, i) => { if (i) { slide.setAttribute('aria-hidden','true'); slide.inert=true; } });
 const dots = [...document.querySelectorAll('[data-go]')];
 let active = 0, playing = !reduced.matches, visible = true, slideVisible = false, hovered = false, focused = false, timer;
+let sixthReachedTracked = false;
 let transitionTimer, captionTimer, captionAnimation;
 const caption = document.querySelector('.scenario-caption');
 function updateCaption() {
@@ -116,6 +119,13 @@ function go(index, manual = true) {
   hero.style.setProperty('--arc-lift', `${(next%3-1)*4}px`);
   playConversation(target);
   active = next;
+  if (manual) {
+    trackGoal('scenario_change', { scenario_id: active + 1 });
+    if (active === 5 && !sixthReachedTracked) {
+      sixthReachedTracked = true;
+      trackGoal('scenario_6_reached');
+    }
+  }
   dots.forEach((dot,i) => {
     if (i===active) dot.setAttribute('aria-current','true'); else dot.removeAttribute('aria-current');
     dot.classList.toggle('is-passed',i<active);
@@ -127,6 +137,8 @@ function go(index, manual = true) {
 }
 document.querySelector('#prev-slide').addEventListener('click', () => go(active-1));
 document.querySelector('#next-slide').addEventListener('click', () => go(active+1));
+document.querySelector('[data-primary-cta]').addEventListener('click', () => trackGoal('hero_cta_click'));
+document.querySelector('.scenario-next-step a').addEventListener('click', () => trackGoal('scenario_final_cta'));
 dots.forEach(dot => dot.addEventListener('click', () => go(Number(dot.dataset.go))));
 carousel.addEventListener('pointerdown', stop, {passive:true});
 carousel.addEventListener('mouseenter', () => { hovered = true; schedule(); });
@@ -228,6 +240,10 @@ contactTabs.forEach((tab, index) => {
     event.preventDefault(); selectContactTab(contactTabs[next]); contactTabs[next].focus();
   });
 });
+document.querySelectorAll('.messenger-panel .messenger-link[href]').forEach(link => {
+  const channel = link.closest('.messenger-panel').id.replace('contact-panel-', '');
+  link.addEventListener('click', () => trackGoal(`contact_${channel}`));
+});
 
 // One passive scroll listener; DOM reads and writes are batched in a frame.
 const header = document.querySelector('.site-header');
@@ -260,7 +276,7 @@ reduced.addEventListener('change', queueScrollScene);
 updateScrollScene();
 
 // Keep native details semantics while animating open and close, including rapid clicks.
-document.querySelectorAll('.faq-list details').forEach(details => {
+document.querySelectorAll('.faq-list details').forEach((details, index) => {
   const summary = details.querySelector('summary');
   const answer = details.querySelector('p');
   let animation, desiredOpen = details.open;
@@ -269,11 +285,13 @@ document.querySelectorAll('.faq-list details').forEach(details => {
       if (animation) animation.cancel();
       animation = null;
       desiredOpen = !details.open;
+      if (desiredOpen) trackGoal('faq_open', { faq_id: index + 1 });
       return;
     }
     event.preventDefault();
     if (!animation) desiredOpen = details.open;
     desiredOpen = !desiredOpen;
+    if (desiredOpen) trackGoal('faq_open', { faq_id: index + 1 });
     const from = details.getBoundingClientRect().height;
     if (animation) animation.cancel();
     details.open = true;

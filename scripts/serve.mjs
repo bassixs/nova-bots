@@ -3,11 +3,15 @@ import { stat } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
 import { resolve, extname, sep } from 'node:path';
 const root = resolve('dist');
-const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.mp4':'video/mp4', '.woff2':'font/woff2', '.xml':'application/xml', '.txt':'text/plain; charset=utf-8' };
+const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.webp':'image/webp', '.ico':'image/x-icon', '.webmanifest':'application/manifest+json', '.mp4':'video/mp4', '.woff2':'font/woff2', '.xml':'application/xml', '.txt':'text/plain; charset=utf-8' };
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
     let pathname = decodeURIComponent(url.pathname);
+    if (/^\/(?:index\.html|services\/max-bots(?:\/index\.html|\/)?)$/i.test(pathname)) {
+      res.writeHead(301, { Location: '/' + url.search }).end();
+      return;
+    }
     if (pathname.endsWith('/')) pathname += 'index.html';
     const file = resolve(root, '.' + pathname);
     if (!file.startsWith(root + sep)) { res.writeHead(403).end(); return; }
@@ -30,5 +34,9 @@ createServer(async (req, res) => {
     stream.on('error', () => res.destroy());
     res.on('close', () => stream.destroy());
     stream.pipe(res);
-  } catch { res.writeHead(404).end('Страница не найдена'); }
-}).listen(4173, '127.0.0.1', () => console.log('Local: http://127.0.0.1:4173/services/max-bots/'));
+  } catch {
+    res.writeHead(404, { 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-cache' });
+    if (req.method === 'HEAD') { res.end(); return; }
+    createReadStream(resolve(root, '404.html')).on('error', () => res.end()).pipe(res);
+  }
+}).listen(Number(process.env.PORT) || 4173, '127.0.0.1', () => console.log(`Local: http://127.0.0.1:${Number(process.env.PORT) || 4173}/`));

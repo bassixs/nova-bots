@@ -1,7 +1,14 @@
-# Redirect HTTP traffic to HTTPS.
 RewriteEngine On
-RewriteCond %{SERVER_PORT} !^443$
-RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
+# One indexable home URL. Keep inbound query parameters, including UTM values.
+RewriteRule ^(index\.html|services/max-bots(?:/index\.html|/)?)$ https://nova-bots.ru/ [R=301,L,NC]
+RewriteCond %{HTTP_HOST} !^nova-bots\.ru$ [NC]
+RewriteRule ^ https://nova-bots.ru%{REQUEST_URI} [R=301,L]
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+RewriteRule ^ https://nova-bots.ru%{REQUEST_URI} [R=301,L]
+
+ErrorDocument 404 /404.html
+AddType application/manifest+json .webmanifest
 
 # Revalidate HTML so updated pages do not load cached scripts from older builds.
 <IfModule mod_headers.c>
