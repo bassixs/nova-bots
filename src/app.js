@@ -236,7 +236,7 @@ let scrollFrame = 0;
 function updateScrollScene() {
   scrollFrame = 0;
   const box = timeline.getBoundingClientRect();
-  const vertical = innerWidth <= 700;
+  const vertical = innerWidth <= 1100;
   const travel = vertical ? Math.max(1, box.height - 80) : Math.max(260, innerHeight * .5);
   const progress = Math.max(0, Math.min(1, (innerHeight * .76 - box.top) / travel));
   header.classList.toggle('is-scrolled', scrollY > 24);
