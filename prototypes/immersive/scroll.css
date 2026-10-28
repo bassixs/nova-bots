@@ -1,0 +1,69 @@
+/* Sequential HTML is the baseline, including no-JS and reduced-motion browsers. */
+.experience{height:auto;min-height:0;overflow:visible}
+.experience-stage{position:relative;isolation:isolate}
+.landing{position:relative;inset:auto;height:max(720px,100svh);opacity:1;transform:none;transition:none}
+.scene{height:max(720px,100svh);transition:none}
+.demo-view{position:relative;inset:auto;margin:0 64px;padding:64px 0 48px;height:max(720px,100svh);opacity:1;transform:none;transition:none;scroll-margin-top:24px}
+.demo-intro h2{min-height:3.15em}
+.scenario-index{transition:none}
+.demo-view .scenario-carousel{min-height:0}
+.scene canvas{transform-origin:70% 50%}
+.scene:not(.has-webgl) .scene-fallback{transform:scale(var(--scene-shrink,1));transform-origin:70% 50%}
+.header{position:absolute}
+.send-signal{width:44px;height:44px;right:8px;bottom:12px}
+.signal-note{padding-right:64px}
+@media(min-width:1001px) and (min-height:700px){
+ .scroll-ready .experience{height:200svh}
+ .scroll-ready .experience-stage{position:sticky;top:0;height:100svh;overflow:clip}
+ .scroll-ready .landing{position:absolute;inset:0;height:100%;opacity:var(--landing-opacity,1);transform:translateY(var(--landing-y,0px));will-change:transform,opacity}
+ .scroll-ready .scene{height:100%;opacity:var(--scene-opacity,1)}
+ .scroll-ready .demo-view{position:absolute;inset:112px 64px 40px;height:auto;margin:0;padding:0;opacity:1;pointer-events:none}
+ .scroll-ready .demo-intro{opacity:var(--intro-opacity,0);transform:translateY(var(--demo-y,80px));will-change:transform,opacity}
+ .scroll-ready .scenario-carousel{opacity:var(--demo-opacity,0);transform:translateY(var(--demo-y,80px)) scale(var(--demo-scale-enter,.96));transform-origin:center;will-change:transform,opacity}
+ .scroll-ready .demo-view:not([inert]){pointer-events:auto}
+ .scroll-ready .landing[inert]{pointer-events:none}
+ .scroll-ready .demo-view .back-button{margin-bottom:32px}
+ .scroll-ready .demo-view h2{font-size:48px}
+}
+@media(min-width:1001px) and (max-height:800px){
+ .scroll-ready .demo-view{inset:88px 48px 24px}
+}
+@media(max-width:1000px){
+ .landing{height:max(800px,100svh)}
+ .scene{height:max(800px,100svh)}
+ .demo-view{display:block;height:auto;min-height:0;margin:0 20px;padding:48px 0 32px}
+ .demo-intro{margin-bottom:32px}
+ .demo-intro h2{font-size:36px;line-height:40px;min-height:120px}
+ .demo-intro .back-button{margin:0 0 24px}
+ .demo-intro .eyebrow{font-size:10px;margin-bottom:12px}
+ .demo-description{font-size:12px;line-height:20px;margin-top:16px}
+ .demo-contact{display:none}
+ .scenario-carousel{height:auto}
+ .demo-stage{flex:none;height:920px}
+ .demo-stage-content{position:relative;left:auto;top:auto;width:100%;height:100%;transform:none}
+ .chat-panel{top:0;width:min(100%,440px);height:548px;border-radius:20px}
+ .chat-body{font-size:12px;line-height:18px}
+ .staff-panel{top:540px;left:16px;width:min(calc(100% - 16px),424px);height:352px}
+ .staff-content{padding:16px}
+ .staff-content dl{margin-block:16px}
+ .showcase-footer{width:100%;padding-top:8px}
+ .scenario-caption p{font-size:16px;line-height:24px;min-height:48px;max-width:220px;display:flex;align-items:center}
+ .carousel-bottom{align-items:flex-start}
+ .carousel-controls{padding-top:8px}
+ .demo-disclaimer{font-size:12px;line-height:20px;max-width:300px}
+ .signal-note{backdrop-filter:none}
+}
+@media(min-width:701px) and (max-width:1000px){
+ .demo-view{max-width:600px;margin-inline:auto}
+ .chat-panel{left:40px}
+ .staff-panel{left:80px}
+}
+@media(max-width:360px){
+ .chat-panel{height:576px}
+ .staff-panel{top:568px;left:8px;width:calc(100% - 8px);height:368px}
+ .demo-stage{height:964px}
+}
+@media(prefers-reduced-motion:reduce){
+ .scene canvas{transform:none!important}
+ .landing,.demo-view,.scenario-carousel,.demo-intro{transform:none!important;opacity:1!important;will-change:auto!important}
+}

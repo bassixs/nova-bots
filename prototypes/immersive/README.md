@@ -1,0 +1,46 @@
+# NOVA Bots — immersive scroll prototype
+
+Local only, branch `design/nova-immersive`. Production source files, `dist`, `main` and publishing scripts are unchanged. Earlier experiments are preserved in `design/nova-v2` at `ba5c220`.
+
+```powershell
+node prototypes/immersive/build.mjs
+node prototypes/immersive/serve.mjs
+```
+
+Preview: http://127.0.0.1:4196/
+
+## Interaction
+
+- Desktop with motion enabled: a two-viewport document section contains one sticky viewport. Native scroll progress controls the retreat of the NOVA mesh, the headline exit and the MAX/employee interface entrance. Reverse scrolling reverses the transition. No wheel/touch interception, snapping, mandatory delay or recurring scene loop.
+- “Посмотреть в работе” and the six scenario links use native smooth scrolling to the completed demonstration. “Наверх” returns to the hero. Internal navigation retains the query string and incoming UTM.
+- At widths up to 1000px, short viewports, reduced motion or manual motion pause: hero and demonstration remain ordinary consecutive HTML sections. Mobile uses one cached canvas image, not animated 3D.
+- All six v1 scenario records and full MAX/employee markup are reused. The final CTA appears only in scenario six. Arrow buttons, 01–06 selectors, keyboard arrows/Home/End and horizontal swipe remain available. Vertical touch scroll is native.
+
+## Rendering and fallback
+
+`scene.js` generates original folded-ribbon geometry. Desktop uses native WebGL. The vertex/fragment uniform precision mismatch was fixed and WebGL startup is tested. No library or external model dependency is needed.
+
+When WebGL is unavailable or lost, the same interaction uses a cached Canvas 2D mesh and composited CSS transforms. It does not redraw thousands of polygons during scroll. If both contexts are unavailable, the static SVG remains and all HTML/controls still work. Renderers stop when idle or the document is hidden. DPR is capped at 1.5 for WebGL and 1.25 for the cache.
+
+Diagnostic URLs, for QA only:
+
+- `/?renderer=canvas` — force cached Canvas fallback.
+- `/?renderer=svg` — force SVG fallback.
+- Browser `prefers-reduced-motion: reduce` — sequential layout with no moving scene.
+
+## Files and verification
+
+- `build.mjs`: generates this prototype only, reusing production metadata/JSON-LD and scenario data; adds `noindex` for the local prototype.
+- `scroll.js` / `scroll.css`: current scroll entry point. `immersive.js` is the earlier click-to-enter interaction, preserved but not loaded.
+- `qa.cjs`: regression, renderer and local performance checks using an existing Playwright installation. `NOVA_PLAYWRIGHT_PATH` and `CHROME_PATH` can override the local runtime paths. Build/preview require no new dependencies.
+- `review/qa.json`: measured results, viewport checks and fallback outcomes. These are local Chromium measurements and emulated mobile viewports, not field Core Web Vitals or a physical-phone test.
+- `record.cjs`: captures actual Chromium frames during wheel scrolling, scenario switching and return navigation, then encodes WebM using browser MediaRecorder. No desktop capture permission or external upload. Capture cadence is not a performance/FPS benchmark.
+- `review/scroll-transition.webm`: short interaction recording.
+
+Latest local checks: seven viewport sizes, all six scenarios, reverse/native wheel scrolling, CTA/UTM, keyboard and swipe, forced Canvas/SVG fallbacks, actual WebGL context loss and Canvas recovery, reduced motion and no-JS sequential content passed. Measured CLS was 0–0.000064. Local LCP was 168–396 ms; these localhost results are not a production-speed claim. A one-time cold desktop initialization long task reached 250 ms (warm runs 92–95 ms; mobile static initialization 61–64 ms). No recurring drawing occurs when idle, and the fallback mesh is not redrawn while scrolling. The cold initialization cost remains an optimization item before production, along with physical-device testing.
+
+## Reference research
+
+Observed at [Unseen Studio](https://unseen.co/) on desktop and an emulated 390×844 mobile viewport: a persistent spatial scene, camera/material response, typography layered over the scene, a transition into project content, and ordinary navigation alongside exploratory interaction. NOVA adapts the continuity of the experience; it does not use Unseen's code, objects, artwork, copy or identity.
+
+Our accessibility differences are deliberate: readable HTML outside the canvas, unrestricted zoom, no required drag/hold/sound, native vertical scroll, visible focus, motion control and a sequential reduced-motion path. The main remaining review is artistic approval and testing on physical mobile hardware before any production decision.

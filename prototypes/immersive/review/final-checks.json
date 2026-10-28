@@ -1,0 +1,12 @@
+{
+  "focusDuringTransition": "pass",
+  "resize": "pass",
+  "dynamicReducedMotion": "pass",
+  "deepLinkUTM": "pass",
+  "recording": {
+    "width": 1280,
+    "height": 800,
+    "time": 0.6158,
+    "error": null
+  }
+}

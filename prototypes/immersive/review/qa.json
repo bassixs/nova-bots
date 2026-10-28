@@ -1,0 +1,534 @@
+{
+  "results": [
+    {
+      "viewport": "1440x900",
+      "renderer": "webgl",
+      "sixScenes": "pass",
+      "geometry": "stable",
+      "nativeScroll": "pass",
+      "keyboard": "pass",
+      "swipe": "n/a",
+      "utm": "preserved",
+      "perf": {
+        "cls": 0.00002734375,
+        "longTasks": [
+          250
+        ],
+        "events": [
+          24,
+          24,
+          24,
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          24,
+          24,
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          32,
+          32,
+          32
+        ],
+        "lcp": 396
+      },
+      "samples": [
+        {
+          "progress": 0,
+          "hero": 1,
+          "demo": 0,
+          "scene": 1,
+          "height": 2335
+        },
+        {
+          "progress": 0.2,
+          "hero": 0.766485,
+          "demo": 0.00325926,
+          "scene": 0.90848,
+          "height": 2335
+        },
+        {
+          "progress": 0.4,
+          "hero": 0.20863,
+          "demo": 0.304741,
+          "scene": 0.69024,
+          "height": 2335
+        },
+        {
+          "progress": 0.6,
+          "hero": 0,
+          "demo": 0.784,
+          "scene": 0.42976,
+          "height": 2335
+        },
+        {
+          "progress": 0.8,
+          "hero": 0,
+          "demo": 1,
+          "scene": 0.21152,
+          "height": 2335
+        },
+        {
+          "progress": 1,
+          "hero": 0,
+          "demo": 1,
+          "scene": 0.12,
+          "height": 2335
+        }
+      ]
+    },
+    {
+      "viewport": "1366x768",
+      "renderer": "webgl",
+      "sixScenes": "pass",
+      "geometry": "stable",
+      "nativeScroll": "pass",
+      "keyboard": "pass",
+      "swipe": "n/a",
+      "utm": "preserved",
+      "perf": {
+        "cls": 0.000035609260079015796,
+        "longTasks": [
+          95
+        ],
+        "events": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          16,
+          32,
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          32,
+          32,
+          32
+        ],
+        "lcp": 172
+      },
+      "samples": [
+        {
+          "progress": 0,
+          "hero": 1,
+          "demo": 0,
+          "scene": 1,
+          "height": 2071
+        },
+        {
+          "progress": 0.201,
+          "hero": 0.765165,
+          "demo": 0.00342919,
+          "scene": 0.90804,
+          "height": 2071
+        },
+        {
+          "progress": 0.4,
+          "hero": 0.209267,
+          "demo": 0.304136,
+          "scene": 0.69057,
+          "height": 2071
+        },
+        {
+          "progress": 0.6,
+          "hero": 0,
+          "demo": 0.784547,
+          "scene": 0.42943,
+          "height": 2071
+        },
+        {
+          "progress": 0.799,
+          "hero": 0,
+          "demo": 1,
+          "scene": 0.21196,
+          "height": 2071
+        },
+        {
+          "progress": 1,
+          "hero": 0,
+          "demo": 1,
+          "scene": 0.12,
+          "height": 2071
+        }
+      ]
+    },
+    {
+      "viewport": "1280x720",
+      "renderer": "webgl",
+      "sixScenes": "pass",
+      "geometry": "stable",
+      "nativeScroll": "pass",
+      "keyboard": "pass",
+      "swipe": "n/a",
+      "utm": "preserved",
+      "perf": {
+        "cls": 0.0000432586669921875,
+        "longTasks": [
+          92
+        ],
+        "events": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          24,
+          24,
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          32,
+          32,
+          32
+        ],
+        "lcp": 168
+      },
+      "samples": [
+        {
+          "progress": 0,
+          "hero": 1,
+          "demo": 0,
+          "scene": 1,
+          "height": 1975
+        },
+        {
+          "progress": 0.2,
+          "hero": 0.766485,
+          "demo": 0.00325926,
+          "scene": 0.90848,
+          "height": 1975
+        },
+        {
+          "progress": 0.4,
+          "hero": 0.20863,
+          "demo": 0.304741,
+          "scene": 0.69024,
+          "height": 1975
+        },
+        {
+          "progress": 0.6,
+          "hero": 0,
+          "demo": 0.784,
+          "scene": 0.42976,
+          "height": 1975
+        },
+        {
+          "progress": 0.8,
+          "hero": 0,
+          "demo": 1,
+          "scene": 0.21152,
+          "height": 1975
+        },
+        {
+          "progress": 1,
+          "hero": 0,
+          "demo": 1,
+          "scene": 0.12,
+          "height": 1975
+        }
+      ]
+    },
+    {
+      "viewport": "390x844",
+      "renderer": "canvas2d",
+      "sixScenes": "pass",
+      "geometry": "stable",
+      "nativeScroll": "pass",
+      "keyboard": "pass",
+      "swipe": "pass",
+      "utm": "preserved",
+      "perf": {
+        "cls": 0,
+        "longTasks": [
+          62
+        ],
+        "events": [
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          24,
+          24,
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ],
+        "lcp": 196
+      },
+      "samples": []
+    },
+    {
+      "viewport": "430x932",
+      "renderer": "canvas2d",
+      "sixScenes": "pass",
+      "geometry": "stable",
+      "nativeScroll": "pass",
+      "keyboard": "pass",
+      "swipe": "pass",
+      "utm": "preserved",
+      "perf": {
+        "cls": 0,
+        "longTasks": [
+          63
+        ],
+        "events": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          24,
+          24,
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ],
+        "lcp": 172
+      },
+      "samples": []
+    },
+    {
+      "viewport": "320x740",
+      "renderer": "canvas2d",
+      "sixScenes": "pass",
+      "geometry": "stable",
+      "nativeScroll": "pass",
+      "keyboard": "pass",
+      "swipe": "pass",
+      "utm": "preserved",
+      "perf": {
+        "cls": 0,
+        "longTasks": [
+          61
+        ],
+        "events": [
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          24,
+          24,
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ],
+        "lcp": 172
+      },
+      "samples": []
+    },
+    {
+      "viewport": "768x1024",
+      "renderer": "canvas2d",
+      "sixScenes": "pass",
+      "geometry": "stable",
+      "nativeScroll": "pass",
+      "keyboard": "pass",
+      "swipe": "n/a",
+      "utm": "preserved",
+      "perf": {
+        "cls": 0.00006336718797683716,
+        "longTasks": [
+          64
+        ],
+        "events": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          24,
+          24,
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ],
+        "lcp": 172
+      },
+      "samples": []
+    }
+  ],
+  "fallbacks": [
+    {
+      "forced": "canvas",
+      "renderer": "canvas2d",
+      "demo": "pass"
+    },
+    {
+      "forced": "svg",
+      "renderer": "fallback",
+      "demo": "pass"
+    }
+  ],
+  "contextLoss": "canvas2d recovery passed",
+  "reducedMotion": "sequential passed",
+  "noJS": "sequential passed",
+  "productionSources": "unchanged"
+}
