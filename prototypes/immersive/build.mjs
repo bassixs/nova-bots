@@ -2,6 +2,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {scenarios} from '../../src/scenarios.mjs';
 import {carousel,logo,icon,esc} from '../../src/components.mjs';
 import config from '../../site.config.mjs';
+import {fullPageSections} from './sections.mjs';
 
 // Independent entry point. The production build and generated dist stay untouched.
 const production=await readFile(new URL('../../dist/index.html',import.meta.url),'utf8');
@@ -9,8 +10,7 @@ let head=production.match(/<head>([\s\S]*?)<\/head>/)[1];
 head=head.replace(/<script(?![^>]*type="application\/ld\+json")[\s\S]*?<\/script>/g,'')
  .replace(/<link rel="stylesheet"[^>]*>/g,'')
  .replace(/<meta name="robots"[^>]*>/,'<meta name="robots" content="noindex, nofollow">');
-const channels=[['max','MAX',config.contacts.maxUrl],['telegram','Telegram',config.contacts.telegramUrl],['vk','ВКонтакте',config.contacts.vkUrl]];
-const html=`<!doctype html><html lang="ru"><head>${head}<link rel="stylesheet" href="/immersive.css"><link rel="stylesheet" href="/scroll.css"><script type="module" src="/scroll.js"></script></head><body>
+const html=`<!doctype html><html lang="ru"><head>${head}<link rel="stylesheet" href="/immersive.css"><link rel="stylesheet" href="/scroll.css"><link rel="stylesheet" href="/full-page.css"><script type="module" src="/scroll.js"></script><script type="module" src="/full-page.js"></script></head><body>
 <a class="skip-link" href="#main">Перейти к содержимому</a>
 <header class="header"><a class="brand" href="#top" aria-label="NOVA lab — главная">${logo()}</a><a class="header-demo" href="#scenarios">Возможности <span>06</span></a><a class="contact-link" href="#contact">Обсудить проект ${icon('diagonal')}</a></header>
 <main id="main"><section class="experience" id="top" aria-label="Чат-боты в MAX"><div class="experience-stage">
@@ -24,7 +24,7 @@ const html=`<!doctype html><html lang="ru"><head>${head}<link rel="stylesheet" h
  </div>
  <div class="demo-view" id="demo-view"><div class="demo-intro"><a class="back-button" href="#top">${icon('arrow','reverse')} Наверх</a><p class="eyebrow">ВОЗМОЖНОСТИ MAX</p><h2 id="demo-title">${scenarios[0].title}</h2><p class="demo-description">Человек пишет обычное сообщение.<br>Сотрудник получает готовую задачу.</p><a class="demo-contact" href="#contact">Обсудить задачу ${icon('diagonal')}</a></div>${carousel()}</div>
 </div></section>
-<section class="contact" id="contact" tabindex="-1"><p class="eyebrow">ДАВАЙТЕ ОБСУДИМ</p><h2>Начнём с вашей задачи<span>.</span></h2><p>Выберите удобный канал и напишите нам.<br>Детали обсудим в переписке.</p><div class="contact-channels">${channels.map(([id,label,url])=>`<a href="${esc(url)}" data-contact="${id}" target="_blank" rel="noopener noreferrer">${label} ${icon('diagonal')}</a>`).join('')}</div><a class="return-top" href="#top">Наверх ↑</a></section></main>
+${fullPageSections(config)}</main>
 <script type="application/json" id="scenario-data">${JSON.stringify(scenarios).replaceAll('<','\\u003c')}</script>
 </body></html>`;
 await writeFile(new URL('./index.html',import.meta.url),html);

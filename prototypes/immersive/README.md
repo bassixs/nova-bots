@@ -1,5 +1,17 @@
 # NOVA Bots — immersive scroll prototype
 
+## Stage 02 / full page
+
+The local preview now includes all four lower-page sections: editorial process with a scroll-driven rail; one native disclosure-based brief interface; typographic FAQ; and a large final CTA with the real NOVA mark and MAX / Telegram / VK links.
+
+Content comes directly from the v1 section generators in `src/components.mjs`. Only the requested invitation to discuss development and a preliminary estimate is new copy. No new libraries, decorative 3D scenes or forms were added.
+
+`sections.mjs`, `full-page.css` and `full-page.js` are isolated from the approved experience. The entire hero/header HTML and its scene, CSS and scroll controller are verified against `89c2224`. Production files, metadata/JSON-LD, contact destinations and deployment rules remain unchanged.
+
+Run `node prototypes/immersive/qa-full-page.cjs` for the full-page checks, or add `--integrity-only` to check the protected first screen and technical configuration. Checks passed at 1440×900, 1366×768, 390×844, 430×932, 320×740 and 768×1024. Brief/FAQ mouse and keyboard interaction, rapid toggles, reduced motion including changes during animation, no-JS disclosures, process progress, six-scene geometry, swipe, UTM and local analytics stubs are covered.
+
+Review gallery: http://127.0.0.1:4196/review/full-page/gallery.html . `review/full-page/` contains all eight real desktop/mobile section screenshots and `qa.json`. Screenshots use 1440px/390px widths and a 1200px capture viewport to fit each complete section; functional responsive tests use the standard sizes above. These are browser-emulated mobile checks, not physical-device certification.
+
 Local only, branch `design/nova-immersive`. Production source files, `dist`, `main` and publishing scripts are unchanged. Earlier experiments are preserved in `design/nova-v2` at `ba5c220`.
 
 ```powershell
