@@ -1,9 +1,9 @@
 // Record real local browser frames; encode with the browser's own MediaRecorder.
 // No desktop capture permissions, external upload, ffmpeg or new dependencies.
-const {chromium}=require(process.env.NOVA_PLAYWRIGHT_PATH||'C:/Users/User/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {chromium}=require(process.env.NOVA_PLAYWRIGHT_PATH||(require('node:fs').existsSync('C:/Users/User/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright')?'C:/Users/User/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright':'playwright'));
 const fs=require('node:fs'),path=require('node:path');const out=path.join(__dirname,'review');let browser;
 (async()=>{
- browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'C:/Program Files/Google/Chrome/Application/chrome.exe'});
+ browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||(require('node:fs').existsSync('C:/Program Files/Google/Chrome/Application/chrome.exe')?'C:/Program Files/Google/Chrome/Application/chrome.exe':undefined),args:process.platform==='win32'?[]:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
  const page=await browser.newPage({viewport:{width:1280,height:800},deviceScaleFactor:1});await page.goto('http://127.0.0.1:4196/',{waitUntil:'networkidle'});await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(1400);
  const frames=[];const shot=async()=>{const buffer=await page.screenshot({type:'jpeg',quality:82});frames.push({url:'data:image/jpeg;base64,'+buffer.toString('base64'),t:Date.now(),y:await page.evaluate(()=>scrollY)});};
  await shot();await page.waitForTimeout(450);await shot();await page.mouse.move(1140,650);

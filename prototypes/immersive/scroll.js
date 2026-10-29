@@ -28,7 +28,7 @@ function updateScroll(){
  root.style.setProperty('--demo-y',`${(1-enter)*80}px`);
  root.style.setProperty('--demo-scale-enter',.96+.04*enter);
  root.style.setProperty('--intro-opacity',smooth(.55,.9,progress));
- root.style.setProperty('--scene-opacity',1-.88*smooth(0,1,progress));
+ root.style.setProperty('--scene-opacity',1-.9*smooth(0,.5,progress));
  root.style.setProperty('--scene-shrink',1-.38*progress);
  root.dataset.scrollProgress=progress.toFixed(3);
  landing.inert=progress>=.5;landing.setAttribute('aria-hidden',String(progress>=.55));

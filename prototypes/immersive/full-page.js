@@ -8,7 +8,7 @@ const revealObserver=new IntersectionObserver(entries=>{for(const e of entries)i
 reveals.forEach(el=>revealObserver.observe(el));
 
 // A single measured process rail. No motion work is done while it is off-screen.
-const track=root.querySelector('.process-track'),fill=root.querySelector('.process-line>span');
+const track=root.querySelector('.process-track');
 const steps=[...root.querySelectorAll('[data-process-step]')];
 let processVisible=false,processFrame=0;
 function updateProcess(){
@@ -16,7 +16,7 @@ function updateProcess(){
  const rect=track.getBoundingClientRect();
  const progress=motionAllowed()?Math.max(0,Math.min(1,(innerHeight*.7-rect.top)/Math.max(1,rect.height-64))):1;
  const current=Math.min(3,Math.floor(progress*4));
- fill.style.transform=`scaleY(${progress})`;
+ track.style.setProperty('--progress',progress.toFixed(4));
  steps.forEach((step,i)=>{step.classList.toggle('is-reached',!motionAllowed()||i<=current);step.classList.toggle('is-current',i===current)});
 }
 function queueProcess(){if(!processFrame)processFrame=requestAnimationFrame(updateProcess)}

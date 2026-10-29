@@ -1,5 +1,5 @@
 // Real local browser captures. Uses the existing runtime; installs nothing.
-const {chromium}=require(process.env.NOVA_PLAYWRIGHT_PATH||'C:/Users/User/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {chromium}=require(process.env.NOVA_PLAYWRIGHT_PATH||(require('node:fs').existsSync('C:/Users/User/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright')?'C:/Users/User/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright':'playwright'));
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),cp=require('node:child_process');
 const base='http://127.0.0.1:4196',out=path.join(__dirname,'review/refinement');
 fs.mkdirSync(out,{recursive:true});
@@ -13,7 +13,7 @@ const chapters=[['process','Как мы работаем'],['brief','Подго�
 const records=[];
 let browser;
 (async()=>{
- browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'C:/Program Files/Google/Chrome/Application/chrome.exe'});
+ browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||(require('node:fs').existsSync('C:/Program Files/Google/Chrome/Application/chrome.exe')?'C:/Program Files/Google/Chrome/Application/chrome.exe':undefined),args:process.platform==='win32'?[]:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
  for(const [width,height] of [[1440,900],[390,844]]){
   const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1,isMobile:width<700,hasTouch:width<700});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));

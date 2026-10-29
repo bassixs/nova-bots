@@ -1,3 +1,17 @@
+# NOVA Bots — immersive prototype, brand pass (`design/nova-immersive-art`)
+
+This pass replaces the earlier art direction with the NOVA lab brand book. The previous sections below are kept as history.
+
+**3D mark.** `mark-geometry.js` extrudes the actual contours of `public/assets/nova-logo.png`: the angular N (stem + diagonal) with 45° chamfers, and the four-point star as a faceted sparkle. The curved ribbon is gone. The material is dark polished gunmetal (`scene.js`): a near-black studio with narrow cool strips and #6B7CFF / #9C6BFF rim lights (`chrome-studio.js`), so the faces stay deep graphite and the chamfers carry thin brand-coloured highlights. A small additive halo pass makes the star glow. Pointer moves sweep the highlights. The mobile/context-loss posters are re-baked from this exact render (`bake-chrome-posters.cjs`, now portable: falls back to the `playwright` package and software GL off Windows). The SVG fallback uses the same logo contours.
+
+**Design system.** `brand.css` (loaded last) defines the brand-book tokens: #08090D, #11131A, #2A2E3A, #9AA3B2, #F5F7FF, #6B7CFF, #9C6BFF and the blue→violet gradient. It also sets the Manrope type scale (SemiBold headings, 18/14/12 body), pills (primary = white, secondary = blue-tinted outline), round icon buttons, graphite cards with a gradient hairline, motion tokens and responsive rules.
+
+**Composition.** The hero buttons follow the brand book (primary first) and the message card no longer overlaps the mark or the star. On desktop the mark retreats up-right and fades before the MAX panels arrive. On mobile the layout is text, then mark and star, then the message card. Process uses the brand-book geometric marks (✦ ○ △ □) on a horizontal progress rail. Brief and FAQ use graphite cards and round disclosure controls. The final CTA is a lit panel with the logo arc, a dot field and the baked 3D mark. Accent lines of headings use the brand gradient. Copy, the six scenarios, contacts, analytics, UTM, SEO metadata and production files are unchanged.
+
+**QA.** `qa.cjs` / `qa-full-page.cjs` run on Windows as before and in Linux CI with software GL (`NOVA_QA_SLOW` scales waits). The checks that froze the old hero/mesh against `89c2224` were removed, because that design was superseded with approval. Production isolation and metadata/JSON-LD checks remain.
+
+---
+
 # NOVA Bots — immersive scroll prototype
 
 ## Stage 02 / full page

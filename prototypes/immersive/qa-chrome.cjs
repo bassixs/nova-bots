@@ -1,5 +1,5 @@
 // Material-specific review. Does not write into the earlier approved galleries.
-const {chromium}=require(process.env.NOVA_PLAYWRIGHT_PATH||'C:/Users/User/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {chromium}=require(process.env.NOVA_PLAYWRIGHT_PATH||(require('node:fs').existsSync('C:/Users/User/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright')?'C:/Users/User/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright':'playwright'));
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),assert=require('node:assert/strict'),vm=require('node:vm'),crypto=require('node:crypto');
 const base='http://127.0.0.1:4196',out=path.join(__dirname,'review/chrome');fs.mkdirSync(out,{recursive:true});
 const oldScene=cp.execFileSync('git',['show','0d4d2d7:prototypes/immersive/scene.js'],{encoding:'utf8'}),scene=fs.readFileSync(path.join(__dirname,'scene.js'),'utf8');
@@ -54,7 +54,7 @@ async function silhouette(page){return page.evaluate(()=>{
  let mask='';for(let i=3;i<pixels.length;i+=4)mask+=pixels[i]>128?'1':'0';return mask;
 })}
 (async()=>{
- browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'C:/Program Files/Google/Chrome/Application/chrome.exe'});
+ browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||(require('node:fs').existsSync('C:/Program Files/Google/Chrome/Application/chrome.exe')?'C:/Program Files/Google/Chrome/Application/chrome.exe':undefined),args:process.platform==='win32'?[]:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
  let previousMask;
  for(const old of [true,false])for(const [width,height] of [[1440,900],[390,844]]){
   const {page,errors}=await open({old,width,height});assert.equal(await page.locator('.experience').getAttribute('data-renderer'),width===1440?'webgl':'canvas2d');await quiet(page);

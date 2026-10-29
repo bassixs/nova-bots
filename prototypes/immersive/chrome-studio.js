@@ -1,25 +1,28 @@
 // Original, image-free studio lighting. No HDR download or reflection render pass.
-// Five softboxes and a dark studio are baked once into a small RGBM cubemap.
+// A near-black studio with narrow cool strips and two brand-coloured rim lights
+// (#6B7CFF blue, #9C6BFF violet), baked once into a small RGBM cubemap.
 const normalize=a=>{const l=Math.hypot(...a);return a.map(v=>v/l)};
 const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
 const boxes=[
- {direction:[-1.7,1.6,2.4],width:.42,height:1.3,color:[1.3,1.4,1.55]},
- {direction:[1.8,.3,1.6],width:.22,height:1.1,color:[.28,.4,.65]},
- {direction:[0,2.2,.6],width:1.4,height:.3,color:[.6,.67,.78]},
- {direction:[-.4,-1.3,1.7],width:1.5,height:.4,color:[.065,.08,.13]},
- {direction:[1.6,.8,-2],width:.42,height:1.4,color:[.12,.09,.25]}
+ {direction:[-2.0,1.0,.54],width:.1,height:1.5,color:[1.9,2.0,2.25]},   // key strip, cool white
+ {direction:[-.2,2.3,.9],width:1.3,height:.08,color:[.9,.95,1.1]},       // top edge line
+ {direction:[2.1,.35,.5],width:.16,height:1.4,color:[.75,.88,1.8]},      // blue rim
+ {direction:[1.2,-1.3,-1.4],width:.4,height:1.1,color:[1.0,.68,1.65]},   // violet rim, low back
+ {direction:[-2.2,-.4,-.6],width:.18,height:1.2,color:[.45,.52,1.2]},    // blue kicker, left back
+ {direction:[-1.0,.42,.95],width:.5,height:.35,color:[.03,.035,.06]},     // broad sheen on the front plane
+ {direction:[.3,.1,2.4],width:1.4,height:1.0,color:[.035,.04,.06]}       // faint front fill
 ].map(box=>{const direction=normalize(box.direction),right=normalize(cross([0,1,0],direction)),up=cross(direction,right);return {...box,direction,right,up}});
 
 export function studioRadiance(x,y,z,out){
- const horizon=Math.exp(-Math.pow((y+.12)/.38,2)),front=Math.max(0,z)**2;
- out[0]=.006+front*.018+horizon*.012;
- out[1]=.008+front*.023+horizon*.016;
- out[2]=.013+front*.035+horizon*.024;
+ const horizon=Math.exp(-Math.pow((y+.08)/.22,2));
+ out[0]=.003+horizon*.012;
+ out[1]=.004+horizon*.014;
+ out[2]=.007+horizon*.03;
  for(const box of boxes){
   const facing=x*box.direction[0]+y*box.direction[1]+z*box.direction[2];if(facing<=.05)continue;
   const u=Math.abs((x*box.right[0]+y*box.right[1]+z*box.right[2])/facing);
   const v=Math.abs((x*box.up[0]+y*box.up[1]+z*box.up[2])/facing);
-  const power=Math.exp(-.8*(u/box.width)**2-.5*(v/box.height)**4);
+  const power=Math.exp(-1.2*(u/box.width)**2-.6*(v/box.height)**6);
   out[0]+=power*box.color[0];out[1]+=power*box.color[1];out[2]+=power*box.color[2];
  }
  return out;
@@ -44,4 +47,3 @@ export function createStudioCubemap(size=128){
  }
  return {size,faces};
 }
-
