@@ -1,0 +1,107 @@
+{
+  "results": [
+    {
+      "viewport": "1440x900",
+      "overflow": 0,
+      "brief": "mouse and keyboard pass",
+      "faq": "pass",
+      "timeline": "pass",
+      "sixScenes": "unchanged geometry",
+      "utm": "preserved",
+      "consoleErrors": 0
+    },
+    {
+      "viewport": "1366x768",
+      "overflow": 0,
+      "brief": "mouse and keyboard pass",
+      "faq": "pass",
+      "timeline": "pass",
+      "sixScenes": "unchanged geometry",
+      "utm": "preserved",
+      "consoleErrors": 0
+    },
+    {
+      "viewport": "390x844",
+      "overflow": 0,
+      "brief": "mouse and keyboard pass",
+      "faq": "pass",
+      "timeline": "pass",
+      "sixScenes": "unchanged geometry",
+      "utm": "preserved",
+      "consoleErrors": 0
+    },
+    {
+      "viewport": "430x932",
+      "overflow": 0,
+      "brief": "mouse and keyboard pass",
+      "faq": "pass",
+      "timeline": "pass",
+      "sixScenes": "unchanged geometry",
+      "utm": "preserved",
+      "consoleErrors": 0
+    },
+    {
+      "viewport": "320x740",
+      "overflow": 0,
+      "brief": "mouse and keyboard pass",
+      "faq": "pass",
+      "timeline": "pass",
+      "sixScenes": "unchanged geometry",
+      "utm": "preserved",
+      "consoleErrors": 0
+    },
+    {
+      "viewport": "768x1024",
+      "overflow": 0,
+      "brief": "mouse and keyboard pass",
+      "faq": "pass",
+      "timeline": "pass",
+      "sixScenes": "unchanged geometry",
+      "utm": "preserved",
+      "consoleErrors": 0
+    }
+  ],
+  "approvedHero": "HTML, scene, motion and styles byte-identical to 89c2224",
+  "seo": "metadata and JSON-LD preserved",
+  "production": "unchanged",
+  "reducedMotion": "pass",
+  "noJS": "native disclosure pass",
+  "goals": [
+    {
+      "name": "faq_open",
+      "params": {
+        "faq_id": 1
+      }
+    },
+    {
+      "name": "faq_open",
+      "params": {
+        "faq_id": 2
+      }
+    },
+    {
+      "name": "faq_open",
+      "params": {
+        "faq_id": 3
+      }
+    },
+    {
+      "name": "faq_open",
+      "params": {
+        "faq_id": 4
+      }
+    },
+    {
+      "name": "contact_max",
+      "params": {}
+    },
+    {
+      "name": "contact_telegram",
+      "params": {}
+    },
+    {
+      "name": "contact_vk",
+      "params": {}
+    }
+  ]
+}

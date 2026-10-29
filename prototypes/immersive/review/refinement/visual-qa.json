@@ -1,0 +1,54 @@
+{
+  "content": "byte-identical to 400761e except the decorative CTA mark",
+  "hero": "unchanged",
+  "records": [
+    {
+      "width": 1440,
+      "section": "process",
+      "overflow": 0,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "section": "brief",
+      "overflow": 0,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "section": "faq",
+      "overflow": 0,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "section": "cta",
+      "overflow": 0,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "section": "process",
+      "overflow": 0,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "section": "brief",
+      "overflow": 0,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "section": "faq",
+      "overflow": 0,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "section": "cta",
+      "overflow": 0,
+      "errors": []
+    }
+  ]
+}

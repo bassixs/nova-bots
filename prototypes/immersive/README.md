@@ -56,3 +56,13 @@ Latest local checks: seven viewport sizes, all six scenarios, reverse/native whe
 Observed at [Unseen Studio](https://unseen.co/) on desktop and an emulated 390×844 mobile viewport: a persistent spatial scene, camera/material response, typography layered over the scene, a transition into project content, and ordinary navigation alongside exploratory interaction. NOVA adapts the continuity of the experience; it does not use Unseen's code, objects, artwork, copy or identity.
 
 Our accessibility differences are deliberate: readable HTML outside the canvas, unrestricted zoom, no required drag/hold/sound, native vertical scroll, visible focus, motion control and a sequential reduced-motion path. The main remaining review is artistic approval and testing on physical mobile hardware before any production decision.
+
+## Visual refinement
+
+The approved hero, 3D geometry, scroll transition and showcase are untouched. Lower-page styling stays scoped to `.full-page`: consistent medium-weight headings and tracking, quieter shared dividers and microtype, more readable process descriptions, lighter brief material, inset keyboard focus and restrained contact hover states. Chapter spacing is tightened on desktop; the section order and all copy are unchanged.
+
+The final CTA uses the N and star from the original `public/assets/nova-logo.png`. An inline SVG luminance mask and two bounding crops remove the icon tile and arc. No replacement contours are drawn; the public logo asset and production icons remain untouched. This static mask is not animated.
+
+`capture-refinement.cjs` checks the entire generated document against `400761e`, allowing only that decorative mark replacement, verifies keyboard focus and produces twelve real Chromium screenshots. The gallery is at `/review/refinement/gallery.html`. Hero/showcase captures use 1440×900 and 390×844; whole lower sections use the same widths with a 1200px capture height.
+
+`review/refinement/qa.json` records the six-viewport interaction regression, stable six-scenario geometry, UTM/contact checks, metadata/JSON-LD preservation, reduced motion and no-JS checks. `visual-qa.json` records capture/focus/content checks. Mobile results are browser emulation, not physical-device testing. No dependencies were added and nothing was published.

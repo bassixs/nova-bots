@@ -45,7 +45,7 @@ for(const details of root.querySelectorAll('.disclosure')){
   if(state.desired&&details.dataset.faqId)trackGoal('faq_open',{faq_id:Number(details.dataset.faqId)});
   // Height changes only on explicit disclosure interactions; never on scroll.
   state.animation=details.animate([{height:`${from}px`},{height:`${to}px`}],{duration:420,easing:'cubic-bezier(.22,1,.36,1)'});
-  state.reveal=content.animate(state.desired?[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}]:[{opacity:1},{opacity:0}],{duration:300,fill:'backwards',easing:'cubic-bezier(.22,1,.36,1)'});
+  state.reveal=content.animate(state.desired?[{opacity:0,transform:'translateY(4px)'},{opacity:1,transform:'translateY(0)'}]:[{opacity:1},{opacity:0}],{duration:300,fill:'backwards',easing:'cubic-bezier(.22,1,.36,1)'});
   state.animation.onfinish=()=>{details.open=state.desired;state.animation=null;state.reveal=null};
  });
 }
