@@ -12,7 +12,7 @@ const track=root.querySelector('.process-track');
 const steps=[...root.querySelectorAll('[data-process-step]')];
 let processVisible=false,processFrame=0;
 function updateProcess(){
- processFrame=0;if(!processVisible&&motionAllowed())return;
+ processFrame=0;if(!processVisible&&motionAllowed()&&!settleOnExit)return;settleOnExit=false;
  const rect=track.getBoundingClientRect();
  const progress=motionAllowed()?Math.max(0,Math.min(1,(innerHeight*.7-rect.top)/Math.max(1,rect.height-64))):1;
  const current=Math.min(3,Math.floor(progress*4));
@@ -20,7 +20,9 @@ function updateProcess(){
  steps.forEach((step,i)=>{step.classList.toggle('is-reached',!motionAllowed()||i<=current);step.classList.toggle('is-current',i===current)});
 }
 function queueProcess(){if(!processFrame)processFrame=requestAnimationFrame(updateProcess)}
-new IntersectionObserver(entries=>{processVisible=entries[0].isIntersecting;if(processVisible)queueProcess()},{rootMargin:'100px 0px'}).observe(track);
+// Recompute once on exit too, so the rail is correct when the reader returns from either side.
+let settleOnExit=false;
+new IntersectionObserver(entries=>{processVisible=entries[0].isIntersecting;settleOnExit=!processVisible;queueProcess()},{rootMargin:'100px 0px'}).observe(track);
 addEventListener('scroll',()=>{if(processVisible)queueProcess()},{passive:true});
 addEventListener('resize',queueProcess,{passive:true});
 
