@@ -35,20 +35,33 @@ jobs:
             exit 1
           fi
 
-      - name: Upload over SFTP
+      - name: Upload (SFTP, then FTPS fallback)
         env:
           HOSTING_PASSWORD: ${{ secrets.HOSTING_PASSWORD }}
           HOSTING_HOST: server113.hosting.reg.ru
           HOSTING_USER: u3646325
           HOSTING_DIR: www/nova-bots.ru
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq lftp
-          # Upload only; nothing on the server is deleted (backups and old files stay).
-          lftp -u "$HOSTING_USER,$HOSTING_PASSWORD" "sftp://$HOSTING_HOST" -e "
-            set sftp:auto-confirm yes;
-            set net:max-retries 3;
-            mirror --reverse --verbose --only-newer=no --parallel=4 dist/ $HOSTING_DIR/;
-            bye"
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
+          report() { # surface the reason as annotations; the password never appears in lftp output
+            tail -n 8 "$1" | sed "s/$HOSTING_PASSWORD/***/g" | while IFS= read -r line; do echo "::warning title=$2::$line"; done
+          }
+          upload() { # $1 = url, $2 = extra settings. Upload only; nothing on the server is deleted.
+            timeout 300 lftp -u "$HOSTING_USER,$HOSTING_PASSWORD" "$1" -e "
+              set net:max-retries 2; set net:timeout 25; $2
+              cls -1 $HOSTING_DIR/ > /dev/null;
+              mirror --reverse --verbose --parallel=4 dist/ $HOSTING_DIR/;
+              bye"
+          }
+          if upload "sftp://$HOSTING_HOST" "set sftp:auto-confirm yes;" > sftp.log 2>&1; then
+            echo "Uploaded over SFTP"; tail -n 5 sftp.log; exit 0
+          fi
+          report sftp.log SFTP
+          if upload "ftp://$HOSTING_HOST" "set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate no;" > ftp.log 2>&1; then
+            echo "Uploaded over FTPS"; tail -n 5 ftp.log; exit 0
+          fi
+          report ftp.log FTPS
+          echo "::error::Upload failed over both SFTP and FTPS"; exit 1
 
       - name: Smoke test
         run: |
