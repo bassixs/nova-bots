@@ -15,6 +15,12 @@ node scripts/serve.mjs
 
 `src/components.mjs` содержит переиспользуемые шапку, подвал, кнопки, карусель и секции. `src/scenarios.mjs` — содержание примеров. `src/style.css` — базовые стили, `src/experience.css` — анимации, `src/glass.css` — стеклянная тема и геометрическая типографика, `src/atmosphere.css` — композиция первого экрана, оптическое стекло и светящаяся SVG-дуга. `src/app.js` — взаимодействия. Manrope и Unbounded хранятся локально; лицензии включены.
 
+## Текущая версия сайта
+
+С 29.10.2026 главная страница — **NOVA Immersive** в фирменном стиле: 3D-знак N со звездой, демо MAX, этапы, бриф, FAQ и CTA. Её исходники лежат в `prototypes/immersive/`: разметка в `page.mjs` и `sections.mjs`, стили в `immersive.css`, `scroll.css`, `full-page.css` и `brand.css` (дизайн-система по брендбуку), 3D в `scene.js`, `mark-geometry.js` и `chrome-studio.js`. `node scripts/build.mjs` собирает из них `dist/`: CSS склеивается в `assets/immersive.css`, ES-модули и `materials/` копируются в `assets/`. Контакты, SEO, JSON-LD, Метрика и редиректы прежние. Прежняя версия v1 (`src/style.css`, `app.js`, вступительная заставка) больше не входит в сборку, но её файлы остались в `src/` и в истории git.
+
+После изменения 3D-материала или геометрии перепечь картинки для мобильных и fallback: `node prototypes/immersive/bake-chrome-posters.cjs` (нужен запущенный `node prototypes/immersive/serve.mjs`).
+
 ## Настройки перед рекламным запуском
 
 Все публичные настройки находятся в `site.config.mjs`:

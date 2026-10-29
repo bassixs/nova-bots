@@ -9,10 +9,16 @@ RewriteRule ^ https://nova-bots.ru%{REQUEST_URI} [R=301,L]
 
 ErrorDocument 404 /404.html
 AddType application/manifest+json .webmanifest
+# ES modules (scene, posters) must be served as JavaScript.
+AddType text/javascript .js .mjs
 
 # Revalidate HTML so updated pages do not load cached scripts from older builds.
 <IfModule mod_headers.c>
   <FilesMatch "\.html$">
     Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  # Imported modules carry no version query; revalidate them so a deploy is picked up at once.
+  <FilesMatch "\.(js|mjs)$">
+    Header set Cache-Control "no-cache"
   </FilesMatch>
 </IfModule>
