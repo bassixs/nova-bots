@@ -1,0 +1,61 @@
+# Builds dist/ and uploads it to the reg.ru hosting (ispmanager, account u3646325).
+# The hosting password lives only in the repository secret HOSTING_PASSWORD.
+name: Deploy to nova-bots.ru
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build
+        env:
+          NOVA_METRICA_ID: ${{ vars.NOVA_METRICA_ID }}
+        run: node scripts/build.mjs
+
+      - name: Check secret
+        env:
+          HOSTING_PASSWORD: ${{ secrets.HOSTING_PASSWORD }}
+        run: |
+          if [ -z "$HOSTING_PASSWORD" ]; then
+            echo "::error::Add the repository secret HOSTING_PASSWORD (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+
+      - name: Upload over SFTP
+        env:
+          HOSTING_PASSWORD: ${{ secrets.HOSTING_PASSWORD }}
+          HOSTING_HOST: server113.hosting.reg.ru
+          HOSTING_USER: u3646325
+          HOSTING_DIR: www/nova-bots.ru
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+          # Upload only; nothing on the server is deleted (backups and old files stay).
+          lftp -u "$HOSTING_USER,$HOSTING_PASSWORD" "sftp://$HOSTING_HOST" -e "
+            set sftp:auto-confirm yes;
+            set net:max-retries 3;
+            mirror --reverse --verbose --only-newer=no --parallel=4 dist/ $HOSTING_DIR/;
+            bye"
+
+      - name: Smoke test
+        run: |
+          sleep 5
+          code=$(curl -s -o page.html -w '%{http_code}' https://nova-bots.ru/)
+          echo "HTTP $code"
+          test "$code" = "200"
+          grep -q 'assets/immersive.css' page.html
+          curl -sfI https://nova-bots.ru/assets/materials/posters.mjs | grep -i 'content-type'
