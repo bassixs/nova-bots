@@ -32,7 +32,7 @@ Preview: http://127.0.0.1:4196/
 
 `scene.js` generates original folded-ribbon geometry. Desktop uses native WebGL. The vertex/fragment uniform precision mismatch was fixed and WebGL startup is tested. No library or external model dependency is needed.
 
-When WebGL is unavailable or lost, the same interaction uses a cached Canvas 2D mesh and composited CSS transforms. It does not redraw thousands of polygons during scroll. If both contexts are unavailable, the static SVG remains and all HTML/controls still work. Renderers stop when idle or the document is hidden. DPR is capped at 1.5 for WebGL and 1.25 for the cache.
+When WebGL is unavailable or lost, the same interaction uses a Canvas 2D poster captured from this exact WebGL geometry/material, with the original composited CSS transforms. Mobile loads a 24 KB transparent WebP; desktop fallback loads 49 KB. The original projection is reconstructed from the saved frame/crop coordinates at any aspect ratio. No CPU mesh shading occurs on mobile or scroll. SVG remains visible until the poster is decoded, and stays if it cannot load or both contexts are unavailable. Renderers stop when idle or the document is hidden. DPR is capped at 1.5 for WebGL and 1.25 for the poster.
 
 Diagnostic URLs, for QA only:
 
@@ -49,7 +49,7 @@ Diagnostic URLs, for QA only:
 - `record.cjs`: captures actual Chromium frames during wheel scrolling, scenario switching and return navigation, then encodes WebM using browser MediaRecorder. No desktop capture permission or external upload. Capture cadence is not a performance/FPS benchmark.
 - `review/scroll-transition.webm`: short interaction recording.
 
-Latest local checks: seven viewport sizes, all six scenarios, reverse/native wheel scrolling, CTA/UTM, keyboard and swipe, forced Canvas/SVG fallbacks, actual WebGL context loss and Canvas recovery, reduced motion and no-JS sequential content passed. Measured CLS was 0–0.000064. Local LCP was 168–396 ms; these localhost results are not a production-speed claim. A one-time cold desktop initialization long task reached 250 ms (warm runs 92–95 ms; mobile static initialization 61–64 ms). No recurring drawing occurs when idle, and the fallback mesh is not redrawn while scrolling. The cold initialization cost remains an optimization item before production, along with physical-device testing.
+Earlier scroll-stage checks: seven viewport sizes, all six scenarios, reverse/native wheel scrolling, CTA/UTM, keyboard and swipe, forced Canvas/SVG fallbacks, actual WebGL context loss and Canvas recovery, reduced motion and no-JS sequential content passed. Historical CLS was 0–0.000064 and local LCP was 168–396 ms. See the material-pass measurements below for the current renderer; localhost results are not a production-speed claim.
 
 ## Reference research
 
@@ -66,3 +66,13 @@ The final CTA uses the N and star from the original `public/assets/nova-logo.png
 `capture-refinement.cjs` checks the entire generated document against `400761e`, allowing only that decorative mark replacement, verifies keyboard focus and produces twelve real Chromium screenshots. The gallery is at `/review/refinement/gallery.html`. Hero/showcase captures use 1440×900 and 390×844; whole lower sections use the same widths with a 1200px capture height.
 
 `review/refinement/qa.json` records the six-viewport interaction regression, stable six-scenario geometry, UTM/contact checks, metadata/JSON-LD preservation, reduced motion and no-JS checks. `visual-qa.json` records capture/focus/content checks. Mobile results are browser emulation, not physical-device testing. No dependencies were added and nothing was published.
+
+## Cold polished chrome
+
+Only sculpture material/fallback changed. The regular surface pattern came from an explicit 48-groove UV shader, a mediump fragment-coordinate hash and fallback machining lines. They are removed. The existing 6,501 vertices / 12,544 triangles, smooth unit normals, index winding, cursor transform and scroll transform remain intact; the before/after rendered silhouette comparison has IoU 1. All typography, section styles, carousel, copy and production source remain unchanged.
+
+`chrome-studio.js` defines original cold studio illumination, baked once into a 128px RGBM cubemap. The metal shader uses one environment lookup, conductor Fresnel and tone mapping. No reflection render pass, bloom, downloaded HDR, library or ongoing environment computation. High precision is used when supported, with a matched mediump shader fallback.
+
+`bake-chrome-posters.cjs` captures the real shader/mesh into `materials/` for mobile and context loss; rerun it after material changes. `qa-chrome.cjs` rejects stale posters by source hash, validates normals/indices, protects all other page content, measures local before/after rendering, and tests blocked WebGL, blocked Canvas, image failure, real context loss, Retina and reduced motion. Context loss no longer mistakes inherited canvas dimensions/draw counters for a valid cached image.
+
+Review: `/review/chrome/gallery.html`, three desktop states plus mobile/fallback captures. `material-qa.json` contains the detailed local measurements; `regression/qa.json` contains the seven-viewport scenario/scroll regression. In the comparative local run, pointer-frame p95 was 16.8 ms, cubemap preparation 31 ms once, mobile poster submission 1.2 ms, no mobile long task over 50 ms, and idle draw counts stopped. Submission timing is not GPU timing; these are headless Chromium diagnostics, not physical-device or field-performance claims. No dependency, publishing or production changes.
