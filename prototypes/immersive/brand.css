@@ -227,7 +227,7 @@ body::after{content:"";position:fixed;inset:0;z-index:60;pointer-events:none;bac
 .full-page .cta-composition{grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:40px;align-items:center}
 .full-page .cta-copy .eyebrow{margin-bottom:32px}
 .full-page .final-cta h2{font-size:clamp(56px,6vw,88px);line-height:1.02;letter-spacing:-.05em}
-.full-page .final-cta h2 .accent{white-space:nowrap}
+@media(min-width:701px){.full-page .final-cta h2 .accent{white-space:nowrap}}
 .full-page .cta-description{font-size:18px;line-height:1.6;color:var(--gray);margin-top:32px}
 .full-page .cta-sign{position:relative;aspect-ratio:1/.9;width:100%}
 .full-page .cta-sign img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 30px 60px rgba(0,0,0,.6))}

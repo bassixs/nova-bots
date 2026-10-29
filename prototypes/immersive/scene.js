@@ -7,16 +7,18 @@ import {buildMark} from './mark-geometry.js';
 export function createScene(canvas,onReady,options={}){
  const forced=new URL(location.href).searchParams.get('renderer');
  if(forced==='svg'){onReady(false);return {setMode(){},setProgress(){},setPointer(){},setEnabled(){},dispose(){}}}
+ const layout=options.layout==='cta'?1:0;
+ if(layout&&(forced==='canvas'||options.staticOnly)){onReady(false);return {redraw(){},setMode(){},setProgress(){},setPointer(){},setEnabled(){},dispose(){}}}
  if(options.staticOnly||forced==='canvas')return createCanvasScene(canvas,onReady);
  const gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:true,powerPreference:'low-power'});
- if(!gl){canvas.dataset.fallbackReason='WebGL context unavailable';return createCanvasScene(canvas,onReady)}
+ if(!gl){canvas.dataset.fallbackReason='WebGL context unavailable';if(layout){onReady(false);return {redraw(){},setMode(){},setProgress(){},setPointer(){},setEnabled(){},dispose(){}}}return createCanvasScene(canvas,onReady)}
  const precision=gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER,gl.HIGH_FLOAT)?.precision?'highp':'mediump';
-const placement=`uniform float uAspect,uMode,uEnergy;uniform vec2 uPointer;
+const placement=`uniform float uAspect,uMode,uEnergy,uLayout;uniform vec2 uPointer;
  mat3 rx(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0.,0.,c,s,0.,-s,c);}
  mat3 ry(float a){float c=cos(a),s=sin(a);return mat3(c,0.,-s,0.,1.,0.,s,0.,c);}
  mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,s,0.,-s,c,0.,0.,0.,1.);}
- mat3 rotation(){return ry(-.5+uPointer.x*.2+uMode*.55)*rx(-.16+uPointer.y*.12)*rz(.05-uMode*.25);}
- vec3 place(vec3 p){if(uAspect<.8){p*=mix(.6,.55,uMode);p.x+=mix(.12,-.6,uMode);p.y-=1.13;}else{p*=mix(1.28,.9,uMode);p.x+=mix(1.62,2.35,uMode);p.y+=mix(-.02,.28,uMode);}p.z-=uMode*2.2;return p;}
+ mat3 rotation(){if(uLayout>.5)return ry(-.78+uPointer.x*.28+uMode*.5)*rx(-.14+uPointer.y*.16)*rz(.04);return ry(-.5+uPointer.x*.2+uMode*.55)*rx(-.16+uPointer.y*.12)*rz(.05-uMode*.25);}
+ vec3 place(vec3 p){if(uLayout>.5){p*=mix(1.45,1.62,uMode);p.x+=.05;return p;}if(uAspect<.8){p*=mix(.6,.55,uMode);p.x+=mix(.12,-.6,uMode);p.y-=1.13;}else{p*=mix(1.28,.9,uMode);p.x+=mix(1.62,2.35,uMode);p.y+=mix(-.02,.28,uMode);}p.z-=uMode*2.2;return p;}
  vec4 project(vec3 p){float z=6.7-p.z;return vec4(p.x*2.42/uAspect,p.y*2.42,(z-.1)*1.002-.2,z);}`;
  const vertex=`precision ${precision} float;attribute vec3 aPosition;attribute vec3 aNormal;attribute vec2 aUv;
  varying vec3 vNormal,vPosition,vLocal;varying vec2 vUv;${placement}
@@ -47,8 +49,8 @@ const placement=`uniform float uAspect,uMode,uEnergy;uniform vec2 uPointer;
  try{glow=gl.createProgram();gl.attachShader(glow,shader(gl.VERTEX_SHADER,`precision ${precision} float;attribute vec2 aCorner;uniform vec3 uStar;varying vec2 vCorner;${placement}
  void main(){vCorner=aCorner;vec4 c=project(place(rotation()*uStar));float size=uAspect<.8?.8:.62;c.xy+=aCorner*size*mix(1.,.7,uMode)*vec2(1./uAspect,1.)*c.w*.42;gl_Position=c;}`));
   gl.attachShader(glow,shader(gl.FRAGMENT_SHADER,`precision ${precision} float;varying vec2 vCorner;uniform float uMode;
- void main(){float d=length(vCorner);float core=exp(-d*d*10.)*.34+exp(-d*d*2.6)*.14;float rays=exp(-abs(vCorner.x)*28.)*exp(-abs(vCorner.y)*2.2)+exp(-abs(vCorner.y)*28.)*exp(-abs(vCorner.x)*2.2);
- float edge=smoothstep(1.,.55,max(abs(vCorner.x),abs(vCorner.y)));vec3 c=(vec3(.55,.6,1.)*core+vec3(.75,.8,1.)*rays*.22)*edge;c*=1.-.5*uMode;gl_FragColor=vec4(c,max(c.r,max(c.g,c.b)));}`));
+ uniform float uLayout;void main(){float d=length(vCorner);float core=exp(-d*d*10.)*.34+exp(-d*d*2.6)*.14;float rays=exp(-abs(vCorner.x)*28.)*exp(-abs(vCorner.y)*2.2)+exp(-abs(vCorner.y)*28.)*exp(-abs(vCorner.x)*2.2);
+ float edge=smoothstep(1.,.55,max(abs(vCorner.x),abs(vCorner.y)));vec3 c=(vec3(.55,.6,1.)*core+vec3(.75,.8,1.)*rays*.22)*edge;c*=uLayout>.5?.45+.85*uMode:1.-.5*uMode;gl_FragColor=vec4(c,max(c.r,max(c.g,c.b)));}`));
   gl.linkProgram(glow);if(!gl.getProgramParameter(glow,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(glow))}catch(error){glow=null;canvas.dataset.glowError=error.message}
  const quad=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,quad);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
  gl.useProgram(program);gl.enable(gl.DEPTH_TEST);gl.clearColor(0,0,0,0);
@@ -60,20 +62,20 @@ const placement=`uniform float uAspect,uMode,uEnergy;uniform vec2 uPointer;
  canvas.dataset.vertices=String(data.length/8);canvas.dataset.triangles=String(indices.length/3);
  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
   const indexBuffer=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);
- const uniforms=Object.fromEntries(['uAspect','uMode','uEnergy','uPointer'].map(n=>[n,gl.getUniformLocation(program,n)]));
+ const uniforms=Object.fromEntries(['uAspect','uMode','uEnergy','uPointer','uLayout'].map(n=>[n,gl.getUniformLocation(program,n)]));
  let frame=0,mode=0,targetMode=0,energy=.55,targetEnergy=0,px=0,py=0,tx=0,ty=0,enabled=true,disposed=false,last=0,delegate;
  const attributes=[['aPosition',3,0],['aNormal',3,12],['aUv',2,24]].map(([name,size,offset])=>[gl.getAttribLocation(program,name),size,offset]).filter(a=>a[0]>=0);
- const glowUniforms=glow&&Object.fromEntries(['uAspect','uMode','uPointer','uStar'].map(n=>[n,gl.getUniformLocation(glow,n)])),glowCorner=glow&&gl.getAttribLocation(glow,'aCorner');
+ const glowUniforms=glow&&Object.fromEntries(['uAspect','uMode','uPointer','uStar','uLayout'].map(n=>[n,gl.getUniformLocation(glow,n)])),glowCorner=glow&&gl.getAttribLocation(glow,'aCorner');
  function paint(w,h){
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);
   for(const [loc,size,offset] of attributes){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,32,offset)}
   gl.enable(gl.DEPTH_TEST);gl.disable(gl.BLEND);
-  gl.uniform1f(uniforms.uAspect,w/h);gl.uniform1f(uniforms.uMode,mode);gl.uniform1f(uniforms.uEnergy,energy);gl.uniform2f(uniforms.uPointer,px,py);gl.drawElements(gl.TRIANGLES,indices.length,gl.UNSIGNED_SHORT,0);
+  gl.uniform1f(uniforms.uAspect,w/h);gl.uniform1f(uniforms.uMode,mode);gl.uniform1f(uniforms.uEnergy,energy);gl.uniform2f(uniforms.uPointer,px,py);gl.uniform1f(uniforms.uLayout,layout);gl.drawElements(gl.TRIANGLES,indices.length,gl.UNSIGNED_SHORT,0);
   for(const [loc] of attributes)gl.disableVertexAttribArray(loc);
   if(glow){gl.useProgram(glow);gl.bindBuffer(gl.ARRAY_BUFFER,quad);gl.enableVertexAttribArray(glowCorner);gl.vertexAttribPointer(glowCorner,2,gl.FLOAT,false,8,0);
    gl.disable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);
-   gl.uniform1f(glowUniforms.uAspect,w/h);gl.uniform1f(glowUniforms.uMode,mode);gl.uniform2f(glowUniforms.uPointer,px,py);gl.uniform3f(glowUniforms.uStar,...starCenter);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+   gl.uniform1f(glowUniforms.uAspect,w/h);gl.uniform1f(glowUniforms.uMode,mode);gl.uniform2f(glowUniforms.uPointer,px,py);gl.uniform3f(glowUniforms.uStar,...starCenter);gl.uniform1f(glowUniforms.uLayout,layout);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
    gl.disableVertexAttribArray(glowCorner);gl.disable(gl.BLEND)}
  }
  function draw(now){frame=0;if(disposed||document.hidden)return;const started=performance.now(),dt=Math.min(40,now-last||16);last=now;const k=1-Math.exp(-dt/155);

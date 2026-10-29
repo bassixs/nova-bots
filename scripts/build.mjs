@@ -9,7 +9,7 @@ const canonical = origin ? new URL(config.path, origin).href : '';
 // NOVA Immersive (brand pass) is the production page. Its source lives in prototypes/immersive.
 const immersiveDir = 'prototypes/immersive/';
 const css = (await Promise.all(
-  ['immersive.css', 'scroll.css', 'full-page.css', 'brand.css'].map(file => readFile(immersiveDir + file, 'utf8'))
+  ['immersive.css', 'scroll.css', 'full-page.css', 'brand.css', 'lower.css'].map(file => readFile(immersiveDir + file, 'utf8'))
 )).join('\n');
 const modules = ['scroll.js', 'full-page.js', 'scene.js', 'mark-geometry.js', 'chrome-studio.js'];
 const js = Buffer.concat(await Promise.all([...modules.map(f => readFile(immersiveDir + f)), readFile(immersiveDir + 'materials/posters.mjs')]));

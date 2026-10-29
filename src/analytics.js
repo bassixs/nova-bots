@@ -3,7 +3,7 @@ const rawId = document.querySelector('meta[name="nova-metrica-id"]')?.content ||
 const counterId = /^\d+$/.test(rawId) ? Number(rawId) : 0;
 const goalNames = new Set([
   'hero_cta_click', 'scenario_change', 'scenario_6_reached', 'scenario_final_cta',
-  'contact_max', 'contact_telegram', 'contact_vk', 'faq_open',
+  'contact_max', 'contact_telegram', 'contact_vk', 'faq_open', 'brief_copy',
 ]);
 let initialized = false;
 
