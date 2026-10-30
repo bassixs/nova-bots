@@ -24,6 +24,8 @@
  .ready .view-hint{display:inline-flex;align-self:center;align-items:center;gap:6px;min-height:36px;margin-top:4px;padding:0 4px;border:0;background:none;color:var(--blue);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 
  .demo-intro h2{font-size:30px;line-height:34px;min-height:72px}
+ /* The final mark sits above the copy; keep its base clear of the eyebrow. */
+ .full-page .cta-sign{margin-bottom:16px}
 }
 @media(max-width:360px){
  .scenario-carousel[data-view] .demo-stage{height:532px}
