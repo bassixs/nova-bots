@@ -75,7 +75,7 @@ function show(index,manual=true){
 }
 function updateUI(){
  $('#scenario-number').textContent=String(active+1).padStart(2,'0');$('#scenario-title').textContent=data[active].title;$('#demo-title').textContent=data[active].title;
- $$('[data-go]').forEach((e,i)=>{if(i===active)e.setAttribute('aria-current','true');else e.removeAttribute('aria-current');e.classList.toggle('is-passed',i<active)});
+ $$('[data-go]').forEach(e=>{const i=Number(e.dataset.go);if(i===active)e.setAttribute('aria-current','true');else e.removeAttribute('aria-current');e.classList.toggle('is-passed',i<active)});centerChip();
  $$('[data-scenario]').forEach((e,i)=>{if(i===active)e.setAttribute('aria-current','true');else e.removeAttribute('aria-current')});
  $('#carousel-announcement').textContent=demo.inert?'':`${active+1} из 6. ${data[active].title}`;
 }
@@ -88,7 +88,19 @@ function navigate(id,focus=false){
 }
 $$('a[href="#scenarios"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();if(a.dataset.scenario)show(Number(a.dataset.scenario));navigate('scenarios',true)}));
 $$('a[href="#top"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();navigate('top')}));
-$$('[data-go]').forEach(e=>e.addEventListener('click',()=>show(Number(e.dataset.go))));$('#prev-slide').addEventListener('click',()=>show(active-1));$('#next-slide').addEventListener('click',()=>show(active+1));
+$$('[data-go]').forEach(e=>e.addEventListener('click',()=>show(Number(e.dataset.go))));
+// Mobile shows one surface at a time: the client's chat or the staff panel. Both fill
+// the same fixed stage, so switching never changes the page height.
+const chipBar=$('.scenario-chips'),viewButtons=$$('.view-switch [data-view]');
+function centerChip(){if(!chipBar.offsetWidth)return;const chip=chipBar.querySelector(`[data-go="${active}"]`);chipBar.scrollTo({left:chip.offsetLeft-(chipBar.clientWidth-chip.offsetWidth)/2,behavior:paused||motion.matches?'instant':'smooth'})}
+function setView(view){
+ if(carousel.dataset.view===view)return;carousel.dataset.view=view;
+ viewButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===view)));
+ animate($('[data-slide].is-active '+(view==='staff'?'.staff-panel':'.chat-panel')),[{opacity:0,transform:`translateX(${view==='staff'?16:-16}px)`},{opacity:1,transform:'translateX(0)'}],{duration:360});
+}
+carousel.dataset.view='client';
+// The in-chat hint hides with the chat, so focus moves to the visible switch.
+$$('#scenarios [data-view]').forEach(b=>b.addEventListener('click',()=>{setView(b.dataset.view);if(!b.closest('.view-switch'))viewButtons.find(v=>v.dataset.view===b.dataset.view).focus({preventScroll:true})}));$('#prev-slide').addEventListener('click',()=>show(active-1));$('#next-slide').addEventListener('click',()=>show(active+1));
 carousel.addEventListener('keydown',e=>{if(e.altKey||e.metaKey||e.ctrlKey)return;if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();show(e.key==='Home'?0:e.key==='End'?5:active+(e.key==='ArrowRight'?1:-1))}});
 let touch;$('.slides-window').addEventListener('touchstart',e=>{if(e.touches.length===1)touch={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});$('.slides-window').addEventListener('touchend',e=>{if(!touch)return;const t=e.changedTouches[0],x=t.clientX-touch.x,y=t.clientY-touch.y;touch=null;if(Math.abs(x)>45&&Math.abs(x)>Math.abs(y)*1.4)show(active+(x<0?1:-1))},{passive:true});$('.slides-window').addEventListener('touchcancel',()=>touch=null,{passive:true});
 $$('[data-primary-cta]').forEach(e=>e.addEventListener('click',()=>trackGoal('hero_cta_click')));$('.scenario-next-step a').addEventListener('click',()=>trackGoal('scenario_final_cta'));$$('[data-contact]').forEach(e=>e.addEventListener('click',()=>trackGoal(`contact_${e.dataset.contact}`)));
