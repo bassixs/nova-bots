@@ -44,6 +44,7 @@ export function fullPageSections(config){
   <div class="process-heading section-reveal"><p class="eyebrow">01 / КАК МЫ РАБОТАЕМ</p><h2 id="process-title" class="lines">${lines('От задачи —<br><span class="accent">к работающему решению.</span>')}</h2></div>
   <div class="journey" data-journey><div class="journey-stage">
    <div class="journey-rail" aria-hidden="true"><span class="journey-fill"></span><span class="journey-star"><svg viewBox="0 0 32 32">${glyphs[0]}</svg></span></div>
+   <div class="process-tabs" aria-label="Этапы работы">${steps.map((s,i)=>`<button type="button" data-process-go="${i}" aria-label="Этап ${i+1}: ${esc(s.title)}"${i?'':' aria-current="true"'}>0${i+1}<span></span></button>`).join('')}</div>
    <div class="process-track">${steps.map((s,i)=>`<article class="process-step" data-process-step="${i}">${glyph(i)}<span class="process-number" aria-hidden="true">0${i+1}</span><div class="process-step-copy"><h3>${s.title}</h3><p>${s.text}</p></div>${frames[i]}</article>`).join('')}</div>
    <div class="journey-window" aria-hidden="true"><span class="journey-window-bar"><i></i><i></i><i></i><b>Сценарий 01 · ${esc(s0.title)}</b></span></div>
   </div></div>

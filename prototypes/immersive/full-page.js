@@ -32,6 +32,19 @@ addEventListener('scroll',queueProcess,{passive:true});
 addEventListener('resize',queueProcess,{passive:true});
 large.addEventListener('change',queueProcess);
 
+// Phones: the four steps are a swipeable row; the 01–04 switches follow it and steer it.
+// Elsewhere the row does not overflow, so the observer below never changes anything.
+const track=root.querySelector('.process-track'),processTabs=[...root.querySelectorAll('[data-process-go]')],visibleShare=new Map();
+function markStep(index){processTabs.forEach((tab,i)=>{if(i===index)tab.setAttribute('aria-current','true');else tab.removeAttribute('aria-current');tab.classList.toggle('is-passed',i<index)})}
+processTabs.forEach((tab,i)=>tab.addEventListener('click',()=>{markStep(i);track.scrollTo({left:steps[i].offsetLeft-parseFloat(getComputedStyle(track).paddingLeft),behavior:motionAllowed()?'smooth':'instant'})}));
+const stepObserver=new IntersectionObserver(entries=>{
+ for(const e of entries)visibleShare.set(e.target,e.intersectionRatio);
+ if(track.scrollWidth<=track.clientWidth)return;
+ let best=0;steps.forEach((step,i)=>{if((visibleShare.get(step)||0)>(visibleShare.get(steps[best])||0))best=i});
+ markStep(best);
+},{root:track,threshold:[.25,.5,.75,1]});
+steps.forEach(step=>stepObserver.observe(step));
+
 // Brief builder: picks become a ready-to-send description. Nothing is sent from the page.
 const brief=root.querySelector('#brief-builder');
 if(brief){

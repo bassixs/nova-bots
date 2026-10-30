@@ -1,6 +1,6 @@
 /* Mobile rhythm. Loaded last; desktop and tablet layouts are untouched.
    Scenario chips sit above the demo, and one surface is shown at a time. */
-.mobile-demo-controls,.view-hint,.chat-next-step,.mobile-cta{display:none}
+.mobile-demo-controls,.view-hint,.chat-next-step,.mobile-cta,.process-tabs{display:none}
 @media(max-width:700px){
  .ready .mobile-demo-controls{display:grid;gap:12px;margin-bottom:16px}
  .ready .slide-indicators{display:none}
@@ -32,6 +32,19 @@
  .ready .mobile-cta .icon{width:18px;height:18px}
  .ready.cta-float .mobile-cta{opacity:1;visibility:visible;transform:none;transition:opacity var(--t) var(--ease),transform var(--t) var(--ease),visibility 0s}
  .ready .mobile-cta:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+ /* "Как работаем": the four steps become a swipeable row of equal cards; 01–04 switches above. */
+ .ready .full-page .process-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:32px}
+ .full-page .process-tabs button{display:flex;flex-direction:column;gap:8px;min-height:44px;padding:8px 0;border:0;background:none;color:var(--gray-2);font:inherit;font-size:12px;line-height:16px;font-weight:500;text-align:left;font-variant-numeric:tabular-nums;cursor:pointer;transition:color var(--t) var(--ease)}
+ .full-page .process-tabs button span{display:block;width:100%;height:2px;border-radius:2px;background:var(--graphite-3);transition:background var(--t) var(--ease)}
+ .full-page .process-tabs .is-passed span{background:#4A4F6A}
+ .full-page .process-tabs [aria-current=true]{color:var(--white)}
+ .full-page .process-tabs [aria-current=true] span{background:var(--grad)}
+ .full-page .process-tabs button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+ .full-page .journey .process-track{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:20px;scrollbar-width:none;margin:16px -20px 0;padding:0 20px}
+ .full-page .journey .process-track::-webkit-scrollbar{display:none}
+ .full-page .journey .process-step{flex:0 0 86%;scroll-snap-align:start;grid-template-columns:24px minmax(0,1fr);column-gap:12px;padding:20px 16px!important;border:1px solid var(--line);border-radius:var(--r-l);background:linear-gradient(180deg,rgba(23,26,35,.6),rgba(13,15,21,.6))}
+ .full-page .journey .process-step .journey-frame{grid-column:1/-1;margin-top:16px}
 
  .demo-intro h2{font-size:30px;line-height:34px;min-height:72px}
  /* The final mark sits above the copy; keep its base clear of the eyebrow. */
