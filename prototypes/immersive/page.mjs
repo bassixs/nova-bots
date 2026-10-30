@@ -18,5 +18,6 @@ export function immersiveBody(config){return `
  <div class="demo-view" id="demo-view"><div class="demo-intro"><a class="back-button" href="#top">${icon('arrow','reverse')} Наверх</a><p class="eyebrow">ВОЗМОЖНОСТИ MAX</p><h2 id="demo-title">${scenarios[0].title}</h2><p class="demo-description">Человек пишет обычное сообщение.<br>Сотрудник получает готовую задачу.</p><a class="demo-contact" href="#contact">Обсудить задачу ${icon('diagonal')}</a></div>${carousel()}</div>
 </div></section>
 ${fullPageSections(config)}</main>
+<a class="mobile-cta" href="#contact">Обсудить задачу ${icon('diagonal')}</a>
 <script type="application/json" id="scenario-data">${JSON.stringify(scenarios).replaceAll('<','\\u003c')}</script>
 `;}

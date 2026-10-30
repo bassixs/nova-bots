@@ -103,7 +103,12 @@ carousel.dataset.view='client';
 $$('#scenarios [data-view]').forEach(b=>b.addEventListener('click',()=>{setView(b.dataset.view);if(!b.closest('.view-switch'))viewButtons.find(v=>v.dataset.view===b.dataset.view).focus({preventScroll:true})}));$('#prev-slide').addEventListener('click',()=>show(active-1));$('#next-slide').addEventListener('click',()=>show(active+1));
 carousel.addEventListener('keydown',e=>{if(e.altKey||e.metaKey||e.ctrlKey)return;if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();show(e.key==='Home'?0:e.key==='End'?5:active+(e.key==='ArrowRight'?1:-1))}});
 let touch;$('.slides-window').addEventListener('touchstart',e=>{if(e.touches.length===1)touch={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});$('.slides-window').addEventListener('touchend',e=>{if(!touch)return;const t=e.changedTouches[0],x=t.clientX-touch.x,y=t.clientY-touch.y;touch=null;if(Math.abs(x)>45&&Math.abs(x)>Math.abs(y)*1.4)show(active+(x<0?1:-1))},{passive:true});$('.slides-window').addEventListener('touchcancel',()=>touch=null,{passive:true});
-$$('[data-primary-cta]').forEach(e=>e.addEventListener('click',()=>trackGoal('hero_cta_click')));$('.scenario-next-step a').addEventListener('click',()=>trackGoal('scenario_final_cta'));$$('[data-contact]').forEach(e=>e.addEventListener('click',()=>trackGoal(`contact_${e.dataset.contact}`)));
+$$('[data-primary-cta]').forEach(e=>e.addEventListener('click',()=>trackGoal('hero_cta_click')));$$('.scenario-next-step a,.chat-next-step').forEach(e=>e.addEventListener('click',()=>trackGoal('scenario_final_cta')));
+// Mobile: a floating "Обсудить задачу" once the hero buttons scroll away; it steps aside at the contacts.
+let heroPassed=false,atContact=false;
+const syncCta=()=>document.body.classList.toggle('cta-float',heroPassed&&!atContact);
+new IntersectionObserver(([e])=>{heroPassed=!e.isIntersecting&&e.boundingClientRect.top<0;syncCta()}).observe($('.hero-actions'));
+new IntersectionObserver(([e])=>{atContact=e.isIntersecting;syncCta()}).observe($('#contact'));$$('[data-contact]').forEach(e=>e.addEventListener('click',()=>trackGoal(`contact_${e.dataset.contact}`)));
 function restoreHash(){if(location.hash==='#scenarios'){const y=enhanced?root.getBoundingClientRect().top+scrollY+root.offsetHeight-viewport.offsetHeight:demo.getBoundingClientRect().top+scrollY-24;scrollTo({top:y,behavior:'instant'})}else if(location.hash==='#top')scrollTo({top:0,behavior:'instant'})}
 addEventListener('popstate',restoreHash);addEventListener('hashchange',restoreHash);
 updateUI();configure();document.body.classList.add('ready');
