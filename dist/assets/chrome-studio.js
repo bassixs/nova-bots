@@ -28,7 +28,11 @@ export function studioRadiance(x,y,z,out){
  return out;
 }
 
+// The hero and the final CTA bake the same studio; the second scene reuses the result
+// instead of repeating ~35ms of CPU work (several times longer on slow laptops) mid-scroll.
+let baked;
 export function createStudioCubemap(size=128){
+ if(baked?.size===size)return baked;
  const faces=[],color=[0,0,0];
  for(let face=0;face<6;face++){
   const pixels=new Uint8Array(size*size*4);
@@ -45,5 +49,5 @@ export function createStudioCubemap(size=128){
   }
   faces.push(pixels);
  }
- return {size,faces};
+ return baked={size,faces};
 }
