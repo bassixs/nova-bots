@@ -68,6 +68,9 @@ if(brief){
   if(ok)trackGoal('brief_copy');
   return ok;
  }
+ // Phones show the builder only on request; elsewhere the toggle is hidden and the form always shows.
+ const briefChapter=brief.closest('.brief-chapter'),briefOpen=briefChapter.querySelector('.brief-open');
+ briefOpen.addEventListener('click',()=>{const open=!briefChapter.classList.contains('is-open');briefChapter.classList.toggle('is-open',open);briefOpen.setAttribute('aria-expanded',String(open))});
  brief.addEventListener('change',render);
  brief.addEventListener('submit',e=>e.preventDefault());
  copy.addEventListener('click',copyText);

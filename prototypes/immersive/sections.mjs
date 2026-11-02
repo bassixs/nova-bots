@@ -51,6 +51,7 @@ export function fullPageSections(config){
  </section>
  <section class="brief-chapter chapter sweep" id="brief" aria-labelledby="brief-title">
   <div class="brief-heading section-reveal"><p class="eyebrow">У КАЖДОГО ПРОЦЕССА СВОЯ ЛОГИКА</p><h2 id="brief-title" class="lines">${lines('Что обсудим<br><span class="accent">перед стартом</span>')}</h2></div>
+  <button type="button" class="brief-open" aria-expanded="false" aria-controls="brief-builder"><span><b>Соберите описание задачи</b>4 вопроса · около 30 секунд</span>${icon('plus')}</button>
   <form class="brief-builder section-reveal" id="brief-builder" novalidate>
    <div class="brief-groups">${brief.map((b,i)=>`<fieldset class="brief-group"><legend><span class="brief-number">${b.number}</span>${b.title}</legend><p class="brief-hint">${b.text}</p><div class="brief-chips">${briefOptions[i][2].map((o,k)=>`<label class="chip"><input type="checkbox" name="${briefOptions[i][0]}" value="${esc(o)}" id="brief-${briefOptions[i][0]}-${k}"><span>${esc(o)}</span></label>`).join('')}</div></fieldset>`).join('')}</div>
    <aside class="brief-summary" aria-live="polite"><div class="brief-summary-head"><span class="brief-dot"></span>ВАША ЗАДАЧА<span class="brief-count" id="brief-count">0 / 4</span></div>
